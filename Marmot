@@ -26,7 +26,7 @@ getgenv().bgsInfConfig = {
     SHOW_PET_WEBHOOK_USERNAME = true,
 
     MASTERY_BUFFS_LEVEL = 20,  -- Buffs Level To Reach Before Hatching Secret Etc
-    IGNORE_STARTER_HATCH = true,  -- Ignore Starter Hatch (For P2W/Progressed Accounts)
+    IGNORE_STARTER_HATCH = false,  -- Ignore Starter Hatch (For P2W/Progressed Accounts)
     POTIONS_TO_CRAFT = {},  -- "Coins", "Mythic", "Lucky", "Speed" (Craft ALL Tiers)
 }
 
