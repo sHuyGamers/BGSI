@@ -10,8 +10,8 @@ getgenv().bgsInfConfig = {
     RARITY_TO_DELETE = {"Common", "Unique", "Rare", "Epic", "Legendary"},
     LEGENDARY_TIER_TO_DELETE = 1,
 
-    RIFT_EGGS = {"Throwback Egg", "Silly Egg"},
-    HATCH_1X_EGG = "100M Egg",
+    RIFT_EGGS = {"Throwback Egg", "Silly Egg", "Void Egg", "Rainbow Egg"},
+    HATCH_1X_EGG = "Infinity Egg",
 
     WEBHOOK_URL = "https://discord.com/api/webhooks/1364627427250405466/XTyrdTWJXVZaTeGJBnvP2u8CBeQYUK_EuktXQFhTKdzdYC4mmTUnzmdQv-6nZTvChI3Q",
     DISCORD_ID = "601249077975580673",
