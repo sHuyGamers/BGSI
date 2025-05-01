@@ -1,4 +1,4 @@
-setfpscap(5)  -- number = fps
+setfpscap(10)  -- number = fps
 script_key="dOGaUhwlZLjpwxllFQCuOqEakAkdXuuk";
 getgenv().bgsInfConfig = {
     ADD_FRIEND = true,
