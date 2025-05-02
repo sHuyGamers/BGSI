@@ -1,3 +1,4 @@
+setfpscap(10)  -- number = fps
 getgenv().Config = {
     ["Hatching"] = {
         ["Rifts"] = {
@@ -7,8 +8,8 @@ getgenv().Config = {
     },
     ["Webhook"] = {
         ["MinDifficulty"] = "1m",
-        ["UserID"] = "",
-        ["URL"] = "",
+        ["UserID"] = "601249077975580673",
+        ["URL"] = "https://discord.com/api/webhooks/1365561089995309097/N70I96QgeMkFJbsucMuSYLaJuwyPejfX5wR9BLnibvNNmcF02H8bozse23pXh-G7ztQq",
     },
     ["AutoEnchant"] = true -- // Enchant Team Up on all Equipped Pets
 }
