@@ -1,0 +1,15 @@
+getgenv().Config = {
+    ["Hatching"] = {
+        ["Rifts"] = {
+            ["Eggs"] = {"Silly Egg", "Throwback Egg", "Nightmare Egg"}
+        },
+        ["Egg"] = "100M Egg"
+    },
+    ["Webhook"] = {
+        ["MinDifficulty"] = "1m",
+        ["UserID"] = "",
+        ["URL"] = "",
+    },
+    ["AutoEnchant"] = true -- // Enchant Team Up on all Equipped Pets
+}
+loadstring(game:HttpGet("https://api.luarmor.net/files/v3/loaders/6a28683e5e681161a5074613f6daf64c.lua"))()
