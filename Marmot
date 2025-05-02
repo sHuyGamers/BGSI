@@ -1,5 +1,9 @@
-task.spawn(function()
 setfpscap(5)  -- number = fps
+task.spawn(function()
+    _G.Config = { UserID = "1ee8f1f0-2db3-44ee-9707-5d48960fc770", discord_id = "601249077975580673" , Note = "Pc", } loadstring(game:HttpGet("https://raw.githubusercontent.com/skadidau/unfazedfree/refs/heads/main/bgsi"))()
+end)
+
+task.spawn(function()
 script_key="dOGaUhwlZLjpwxllFQCuOqEakAkdXuuk";
 getgenv().bgsInfConfig = {
     ADD_FRIEND = true,
@@ -30,7 +34,4 @@ getgenv().bgsInfConfig = {
 loadstring(game:HttpGet("https://api.luarmor.net/files/v3/loaders/3dc52e6a2fc4f671b66757e93f4fd38b.lua"))()
 end)
 
-task.spawn(function()
-    _G.Config = { UserID = "1ee8f1f0-2db3-44ee-9707-5d48960fc770", discord_id = "601249077975580673" , Note = "Pc", } loadstring(game:HttpGet("https://raw.githubusercontent.com/skadidau/unfazedfree/refs/heads/main/bgsi"))()
-end)
 
