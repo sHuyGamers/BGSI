@@ -2,7 +2,7 @@ setfpscap(10)  -- number = fps
 getgenv().Config = {
     ["Hatching"] = {
         ["Rifts"] = {
-            ["Eggs"] = {"Silly Egg", "Throwback Egg", "Nightmare Egg"}
+            ["Eggs"] = {"Silly Egg", "Throwback Egg"}
         },
         ["Egg"] = "100M Egg"
     },
