@@ -1,4 +1,4 @@
-setfpscap(5)  -- number = fps
+setfpscap(10)  -- number = fps
 task.spawn(function()
 script_key="ZcdOITENlgKoEwoWwehbQdtcPuZczMme";
 getgenv().Config = {
