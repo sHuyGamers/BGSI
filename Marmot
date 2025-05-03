@@ -7,7 +7,6 @@ task.spawn(function()
 script_key="dOGaUhwlZLjpwxllFQCuOqEakAkdXuuk";
 getgenv().bgsInfConfig = {
     ADD_FRIEND = true,
-    FIND_100M_EGG = true,
     AUTO_UPDATE_RESTART = true,
     PURCHASE_ALIENSHOP = true,
     USE_ROYAL_KEY = true,
