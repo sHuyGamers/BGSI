@@ -1,4 +1,4 @@
-setfpscap(5)  -- number = fps
+setfpscap(10)  -- number = fps
 task.spawn(function()
     _G.Config = { UserID = "1ee8f1f0-2db3-44ee-9707-5d48960fc770", discord_id = "601249077975580673" , Note = "Pc", } loadstring(game:HttpGet("https://raw.githubusercontent.com/skadidau/unfazedfree/refs/heads/main/bgsi"))()
 end)
