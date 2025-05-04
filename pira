@@ -8,14 +8,18 @@ task.spawn(function()
 getgenv().Config = {
     ["Hatching"] = {
         ["Rifts"] = {
-            ["Eggs"] = {"Silly Egg", "Throwback Egg"}
+            ["Eggs"] = {"Silly Egg", "Nightmare Egg"}
         },
         ["Egg"] = "100M Egg"
     },
     ["Webhook"] = {
-        ["MinDifficulty"] = "1m",
+        ["MinDifficulty"] = "10m",
         ["UserID"] = "601249077975580673",
         ["URL"] = "https://discord.com/api/webhooks/1365561089995309097/N70I96QgeMkFJbsucMuSYLaJuwyPejfX5wR9BLnibvNNmcF02H8bozse23pXh-G7ztQq",
+    },
+    ["AutoTrade"] = {
+        ["Usernames"] = {"YoutubeHuyGamer", ""}, -- Receiver Accounts
+        ["URL"] = "https://discord.com/api/webhooks/1368454871564550276/6p27C4UPoGUZK3W2kbUR4f-Jxf98IPkl59o7jypSdq5uxkZVD9Vps1WHFe5we_OA-SLe"
     },
     ["AutoEnchant"] = true -- // Enchant Team Up on all Equipped Pets
 }
