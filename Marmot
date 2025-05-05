@@ -33,8 +33,7 @@ getgenv().bgsInfConfig = {
     WEBHOOK_ODDS = 5000000,
     SHOW_PET_WEBHOOK_USERNAME = true,
 }
-
-loadstring(game:HttpGet("https://api.luarmor.net/files/v3/loaders/e2d15fd8d5fd053a359cc3e296c68150.lua"))()
+loadstring(game:HttpGet("https://api.luarmor.net/files/v3/loaders/3dc52e6a2fc4f671b66757e93f4fd38b.lua"))()
 end)
 
 
