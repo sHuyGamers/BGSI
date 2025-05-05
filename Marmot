@@ -5,32 +5,36 @@ end)
 
 task.spawn(function()
 script_key="dOGaUhwlZLjpwxllFQCuOqEakAkdXuuk";
+setfpscap(10)  -- number = fps
 getgenv().bgsInfConfig = {
     ADD_FRIEND = true,
     AUTO_UPDATE_RESTART = true,
     PURCHASE_ALIENSHOP = true,
+    PURCHASE_BLACKMARKET = true,
+    PURCHASE_STARSHOP_SLOT = 14,
+    RESTOCK_SHOP = "Blackmarket",
+
     USE_ROYAL_KEY = true,
     USE_GOLDEN_KEY = true,
+    USE_DICE_KEY = true,
     USE_MYSTERY_BOX = true,
-    RARITY_TO_DELETE = {"Common", "Unique", "Rare", "Epic", "Legendary"},
+
+    RARITY_TO_DELETE = {"Common", "Unique", "Rare", "Epic"},
     LEGENDARY_TIER_TO_DELETE = 1,
 
-    RIFT_EGGS = {"Throwback Egg", "Silly Egg"},
-    HATCH_1X_EGG = "100M Egg",
+    ENCHANT_TEAMUP = true,
+    ENCHANT_TEAMUP_TIER = 1,
+
+    RIFT_EGGS = {"Silly Egg", "Nightmare Egg", "Cyber Egg"},
+    HATCH_1X_EGG = "Cyber Egg", 
 
     WEBHOOK_URL = "https://discord.com/api/webhooks/1364627427250405466/XTyrdTWJXVZaTeGJBnvP2u8CBeQYUK_EuktXQFhTKdzdYC4mmTUnzmdQv-6nZTvChI3Q",
-    DISCORD_ID = "601249077975580673",
-    WEBHOOK_ODDS = 10000000,
+    DISCORD_ID = "@Leader",
+    WEBHOOK_ODDS = 5000000,
     SHOW_PET_WEBHOOK_USERNAME = true,
-    MASTERY_BUFFS_LEVEL = 15,
-    FARM_MIN_GEMS = 1000000,
-    PURCHASE_BLACKMARKET = true,
-    RESTOCK_SHOP = "Blackmarket",
-    ENCHANT_TEAMUP = true,
-    ENCHANT_TEAMUP_TIER = 1, 
 }
 
-loadstring(game:HttpGet("https://api.luarmor.net/files/v3/loaders/3dc52e6a2fc4f671b66757e93f4fd38b.lua"))()
+loadstring(game:HttpGet("https://api.luarmor.net/files/v3/loaders/e2d15fd8d5fd053a359cc3e296c68150.lua"))()
 end)
 
 
