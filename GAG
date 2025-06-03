@@ -1,0 +1,27 @@
+local player = game.Players.LocalPlayer
+if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+    player.Character.HumanoidRootPart.CFrame = CFrame.new(Vector3.new(-288, 3, -34))
+end
+
+local vu = game:GetService("VirtualUser")
+game:GetService("Players").LocalPlayer.Idled:Connect(function()
+    vu:CaptureController()
+    vu:ClickButton2(Vector2.new()) 
+    wait(1)
+end)
+
+while true do
+    local sprinklers = {
+        "Basic Sprinkler",
+        "Advanced Sprinkler",
+        "Godly Sprinkler",
+        "Master Sprinkler"
+    }
+    
+    for _, sprinkler in ipairs(sprinklers) do
+        local args = {sprinkler}
+        game:GetService("ReplicatedStorage"):WaitForChild("GameEvents"):WaitForChild("BuyGearStock"):FireServer(unpack(args))
+    end
+    
+    wait(2)
+end
