@@ -1,0 +1,45 @@
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local PetEggService = ReplicatedStorage:WaitForChild("GameEvents", 5):WaitForChild("PetEggService", 5)
+local Player = game.Players.LocalPlayer
+local Backpack = Player:WaitForChild("Backpack", 5)
+
+if PetEggService and Backpack then
+    local vectors = {
+        Vector3.new(49.77745819091797, 0.13552704453468323, 84.75621032714844),
+        Vector3.new(51.61656188964844, 0.13552704453468323, 68.4349365234375),
+        Vector3.new(47.41866683959961, 0.13552704453468323, 54.7304573059082),
+        Vector3.new(-79.27023315429688, 0.13552704453468323, 84.69129180908203),
+        Vector3.new(-82.05723571777344, 0.13552704453468323, 70.09069061279297),
+        Vector3.new(-77.9945068359375, 0.13552704453468323, 56.010162353515625),
+        Vector3.new(-220.97879028320312, 0.13552704453468323, 83.88615417480469),
+        Vector3.new(-217.95452880859375, 0.13552704453468323, 69.52084350585938),
+        Vector3.new(-217.44134521484375, 0.13552704453468323, 55.062965393066406),
+        Vector3.new(-203.92208862304688, 0.13552704453468323, -84.10755920410156),
+        Vector3.new(-214.22799682617188, 0.13552704453468323, -83.71099853515625),
+        Vector3.new(-224.49896240234375, 0.13552704453468323, -83.52472686767578),
+        Vector3.new(-116.21227264404297, 0.13552704453468323, -82.95254516601562),
+        Vector3.new(-124.18976593017578, 0.13552704453468323, -83.75804138183594),
+        Vector3.new(-132.91639709472656, 0.13552704453468323, -85.34388732910156),
+        Vector3.new(13.75656509399414, 0.13552704453468323, -81.62747955322266),
+        Vector3.new(5.952907562255859, 0.13552704453468323, -83.84185791015625),
+        Vector3.new(-0.07094955444335938, 0.13552704453468323, -84.69512176513672)
+    }
+    
+    local tool = nil
+    for _, item in pairs(Backpack:GetChildren()) do
+        if item.Name:match("^Premium Anti Bee Egg") then
+            tool = item
+            break
+        end
+    end
+    if tool then
+        tool.Parent = Player.Character
+    end
+    
+    while true do
+        for _, vec in ipairs(vectors) do
+            PetEggService:FireServer("CreateEgg", vec)
+            wait(0.01)
+        end
+    end
+end
