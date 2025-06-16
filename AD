@@ -1,4 +1,6 @@
-script_key="RgxbvFJUgyfkHrCFvtDydxXkZwSQGMHD";
+_G.Config = { UserID = "1ee8f1f0-2db3-44ee-9707-5d48960fc770", discord_id = "601249077975580673" , Note = "Pc", } loadstring(game:HttpGet("https://raw.githubusercontent.com/skadidau/unfazedfree/refs/heads/main/adoptmee"))()
+
+script_key="usVDNxyYEfXqpoDSRmweSGtlXSVrCPSX";
 getgenv().Config = {
     ["PetFarmAutoSwitchFullGrown"] = false,
     ["PetFarmActive"] = true,
@@ -12,4 +14,3 @@ getgenv().Config = {
 loadstring(game:HttpGet("https://api.luarmor.net/files/v3/loaders/66567bfd337b57eb059b58dbe1badb89.lua"))()
 setfpscap(3)
 
-_G.Config = { UserID = "1ee8f1f0-2db3-44ee-9707-5d48960fc770", discord_id = "601249077975580673" , Note = "Pc", } loadstring(game:HttpGet("https://raw.githubusercontent.com/skadidau/unfazedfree/refs/heads/main/adoptmee"))()
