@@ -1,1 +1,172 @@
+getgenv().ConfigsKaitun = {
+ ["Low Cpu"] = true,
 
+ ["Limit Tree"] = {
+  ["Limit"] = 150,
+  ["Destroy Untill"] = 100,
+  ["Safe Tree"] = {
+   "IDK",
+   "IDK",
+   "IDK",
+   "IDK"
+  }
+ },
+ Seed = {
+  Buy = {
+   Mode = "Auto", -- Custom , Auto
+   Custom = {
+    "Carrot",
+    "Bamboo",
+    "Pumpkin",
+    "Daffodil",
+    "Orange Tulip",
+    "Watermelon",
+    "Mushroom",
+    "Nightshade",
+    "Beanstalk",
+   }
+  },
+  Place = {
+   Mode = "Lock", -- Select , Lock
+   Select = {
+    "IDK",
+    "IDK",
+    "IDK",
+    "IDK"
+   },
+   Lock = {
+    "IDK",
+ "IDK",
+ "IDK"
+   }
+  }
+ },
+
+ ["Seed Pack"] = {
+  Locked = {
+
+  }
+ },
+
+ Events = {
+  Dino = true,
+
+  ["Traveling Shop"] = {
+   "IDK",
+   "IDK",
+   "Night Staff",
+   "Bee Egg"
+  },
+  Craft = {
+   "Lightning Rod",
+   "Anti Bee Egg",
+   "Primal Egg",
+  },
+  Shop = {
+ "Zen Egg",
+},
+ Restocks_limit = 16000000,
+ MinimumChi = 10
+ },
+
+ Gear = {
+  Buy = { 
+   "Master Sprinkler",
+   "Basic Sprinkler",
+   "Godly Sprinkler",
+   "Advanced Sprinkler",
+   "Lightning Rod",
+   "Tanning Mirror"
+  },
+  Lock = {
+   "Godly Sprinkler",
+  },
+ },
+
+ Eggs = {
+  Place = {
+   "Common Summer Egg",
+   "Zen Egg",
+   "Primal Egg", 
+   "Dinosaur Egg",
+   "Anti Bee Egg",
+   "Paradise Egg",
+   "Rare Egg",
+  },
+  Buy = {
+   "Rare Egg",
+   "Anti Bee Egg",
+   "Zen Egg",
+   "Paradise Egg",
+   "Bee Egg",
+   "Night Egg",
+   "Bug Egg",
+   "Common Summer Egg"
+  }
+ },
+
+ Pets = {
+ ["Start Delete Pet At"] = 40, 
+ ["Upgrade Slot"] = {
+   ["Pet"] = {
+    "Starfish",
+   },
+   ["Limit Upgrade"] = 5,
+   ["Equip When Done"] = {
+    "Blood Kiwi",
+    "Rooster",
+   },
+  },
+  Locked = {
+   "T-Rex",
+   "Kitsune",
+   "Dragonfly",
+   "Raccon",
+   "Fennec Fox",
+   "Spinosaurus",
+   "Disco Bee",
+   "Butterfly",
+   "Mimic Octopus",
+   "Dilophosaurus",
+   ["Koi"] = 2,
+   ["Blood Kiwi"] = 5,
+   ["Rooster"] = 5,
+   ["Starfish"] = 10,
+  },
+  LockPet_Weight = 4, -- if Weight >= 10 they will locked,
+  Instant_Sell = {
+  }
+ },
+
+ Webhook = {
+  UrlPet = "https://discord.com/api/webhooks/1396708297091973304/7D9Wa0TEsz-hIeoG6_vnRgUe07XTLUhIT3q-sLHF3IpgKIh70jUypFV4IR6fLimtM4nu",
+  UrlSeed = "",
+  PcName = "Ocean",
+
+  Noti = {
+   Seeds = {
+    "IDK",
+    "IDK",
+    "IDK",
+   },
+   SeedPack = {
+    "Idk",
+   },
+   Pets = {
+    "Dragonfly",
+    "Spinosaurus",
+    "T-Rex",
+    "Kitsune",
+    "Raccoon",
+    "Disco Bee",
+    "Fennec Fox",
+    "Butterfly",
+    "Mimic Octopus",
+   },
+   Pet_Weight_Noti = false,
+  }
+ },
+}
+
+License = "TyfdPc004E07ZFw8L6MdRkdX5nv6pVh9"
+loadstring(game:HttpGet('https://raw.githubusercontent.com/Real-Aya/Loader/main/Init.lua'))()
