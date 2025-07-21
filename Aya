@@ -166,7 +166,7 @@ getgenv().ConfigsKaitun = {
     "Mimic Octopus",
     "Tanchozuru",
    },
-   Pet_Weight_Noti = true,
+   Pet_Weight_Noti = false,
   }
  },
 }
