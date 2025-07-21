@@ -129,6 +129,7 @@ getgenv().ConfigsKaitun = {
    "Butterfly",
    "Mimic Octopus",
    "Dilophosaurus",
+   "Tanchozuru",
    ["Koi"] = 2,
    ["Blood Kiwi"] = 5,
    ["Rooster"] = 5,
@@ -163,6 +164,7 @@ getgenv().ConfigsKaitun = {
     "Fennec Fox",
     "Butterfly",
     "Mimic Octopus",
+    "Tanchozuru",
    },
    Pet_Weight_Noti = false,
   }
