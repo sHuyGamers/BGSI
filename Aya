@@ -1,7 +1,7 @@
 setfpscap(3)
 getgenv().ConfigsKaitun = {
  ["Low Cpu"] = true,
-	["Auto Rejoin"] = true,
+ ["Auto Rejoin"] = true,
 
  ["Limit Tree"] = {
   ["Limit"] = 200,
