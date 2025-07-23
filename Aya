@@ -1,11 +1,10 @@
 setfpscap(3)
 getgenv().ConfigsKaitun = {
  ["Low Cpu"] = true,
- ["Auto Rejoin"] = true,
 
  ["Limit Tree"] = {
-  ["Limit"] = 200,
-  ["Destroy Untill"] = 100,
+  ["Limit"] = 500,
+  ["Destroy Untill"] = 450,
   ["Safe Tree"] = {
    "IDK",
    "IDK",
@@ -51,12 +50,10 @@ getgenv().ConfigsKaitun = {
  },
 
  Events = {
-  Dino = true,
-
   ["Traveling Shop"] = {
-   "IDK",
-   "IDK",
+   "Bald Eagle",
    "Night Staff",
+   "Star Caller",
    "Bee Egg"
   },
   Craft = {
@@ -68,7 +65,7 @@ getgenv().ConfigsKaitun = {
  "Blood Kiwi",
  "Zen Egg",
 },
- Restocks_limit = 32000000000,
+ Restocks_limit = 3200000000,
  MinimumChi = 10
  },
 
@@ -106,7 +103,7 @@ getgenv().ConfigsKaitun = {
    "Night Egg",
    "Bug Egg",
    "Common Summer Egg",
-   "Uncommon Egg"
+   "Uncommon Egg",
   }
  },
 
@@ -114,13 +111,14 @@ getgenv().ConfigsKaitun = {
  ["Start Delete Pet At"] = 40, 
  ["Upgrade Slot"] = {
    ["Pet"] = {
-    "Starfish",
+    ["Starfish"] = { 8, 76 },
    },
-   ["Limit Upgrade"] = 8,
+   ["Limit Upgrade"] = 5,
    ["Equip When Done"] = {
-    "Blood Kiwi",
-    "Rooster",
-    "Chicken",
+    ["Tanchozuru"] = { 8, 999, 1 },
+    ["Blood Kiwi"] = { 2, 999, 2 },
+    ["Rooster"] = { 2, 999, 3 },
+    ["Chicken"] = { 1, 999, 4 },
    },
   },
   Locked = {
@@ -134,12 +132,11 @@ getgenv().ConfigsKaitun = {
    "Butterfly",
    "Mimic Octopus",
    "Dilophosaurus",
-   "Tanchozuru",
-   ["Koi"] = 2,
-   ["Chicken"] = 3,
-   ["Blood Kiwi"] = 8,
-   ["Rooster"] = 8,
-   ["Starfish"] = 10,
+   ["Tanchozuru"] = 10,
+   ["Chicken"] = 2,
+   ["Blood Kiwi"] = 5,
+   ["Rooster"] = 4,
+   ["Starfish"] = 8,
   },
   LockPet_Weight = 7, -- if Weight >= 10 they will locked,
   Instant_Sell = {
@@ -147,9 +144,9 @@ getgenv().ConfigsKaitun = {
  },
 
  Webhook = {
-  UrlPet = "https://discord.com/api/webhooks/1397318508831838380/zB7sy0PNPl8a7imiFC9xJmeId2BfzjU1K3VuaiYXS6Fe9q4EnVGj-e4em2bKuR9V5y51",
+  UrlPet = "https://discord.com/api/webhooks/1396708297091973304/7D9Wa0TEsz-hIeoG6_vnRgUe07XTLUhIT3q-sLHF3IpgKIh70jUypFV4IR6fLimtM4nu",
   UrlSeed = "",
-  PcName = "sybaus",
+  PcName = "sybausuuuuuuuuuu",
 
   Noti = {
    Seeds = {
@@ -169,11 +166,11 @@ getgenv().ConfigsKaitun = {
     "Disco Bee",
     "Fennec Fox",
     "Butterfly",
-    "Mimic Octopus",
    },
    Pet_Weight_Noti = false,
   }
  },
 }
+
 License = "GaRIrn87BVCa70rMAc8eloHPlqJdQLD3"
 loadstring(game:HttpGet('https://raw.githubusercontent.com/Real-Aya/Loader/main/Init.lua'))()
