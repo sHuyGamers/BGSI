@@ -1,10 +1,11 @@
 setfpscap(3)
 getgenv().ConfigsKaitun = {
+ ["Block Pet Gift"] = true,
  ["Low Cpu"] = true,
 
  ["Limit Tree"] = {
-  ["Limit"] = 500,
-  ["Destroy Untill"] = 450,
+  ["Limit"] = 400,
+  ["Destroy Untill"] = 350,
   ["Safe Tree"] = {
    "IDK",
    "IDK",
@@ -28,17 +29,23 @@ getgenv().ConfigsKaitun = {
    }
   },
   Place = {
-   Mode = "Lock", -- Select , Lock
+   Mode = "Select", -- Select , Lock
    Select = {
-    "IDK",
-    "IDK",
-    "IDK",
-    "IDK"
+    "Cacao",
+    "Sugar Apple",
+    "Ember Lily",
+    "Beanstalk",
+    "Giant Pinecone",
+    "Pepper",
+    "Burning Bud",
+    "Mushroom",
+    "Bone Blossom",
+    "Maple Apple",
+    "Grape",
+    "Mango",
+    "Coconut",
    },
    Lock = {
-    "IDK",
- "IDK",
- "IDK"
    }
   }
  },
@@ -50,6 +57,18 @@ getgenv().ConfigsKaitun = {
  },
 
  Events = {
+  ["Zen Event"] = {
+   ["Restocking"] = { -- Minimumthing to restock
+     Max_Restocks_Price = 5_000_000_000,
+     Minimum_Money = 100,
+     Minimum_Chi = 60
+  },
+   ["Doing"] = {
+     Minimum_Money = 32_000_000,
+     First_Upgrade_Tree = 4,
+     Maximum_Chi = 250,
+   }
+ },
   ["Traveling Shop"] = {
    "Bald Eagle",
    "Night Staff",
@@ -59,27 +78,28 @@ getgenv().ConfigsKaitun = {
   Craft = {
    "Lightning Rod",
    "Anti Bee Egg",
-   "Primal Egg",
   },
   Shop = {
  "Blood Kiwi",
  "Zen Egg",
-},
- Restocks_limit = 3200000000,
- MinimumChi = 10
  },
+},
 
  Gear = {
   Buy = { 
    "Master Sprinkler",
-   "Basic Sprinkler",
    "Godly Sprinkler",
    "Advanced Sprinkler",
+   "Basic Sprinkler",
    "Lightning Rod",
-   "Tanning Mirror"
+   "Level Up Lollipop",
+   "Medium Treat",
+   "Medium Toy",
   },
   Lock = {
    "Godly Sprinkler",
+   "Master Sprinkler",
+   "Level Up Lollipop"
   },
  },
 
@@ -138,7 +158,7 @@ getgenv().ConfigsKaitun = {
    ["Rooster"] = 4,
    ["Starfish"] = 8,
   },
-  LockPet_Weight = 7, -- if Weight >= 10 they will locked,
+  LockPet_Weight = 4, -- if Weight >= 10 they will locked,
   Instant_Sell = {
   }
  },
