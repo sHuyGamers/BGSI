@@ -59,7 +59,7 @@ getgenv().ConfigsKaitun = {
  Events = {
   ["Zen Event"] = {
    ["Restocking"] = { -- Minimumthing to restock
-     Max_Restocks_Price = 5_000_000_000,
+     Max_Restocks_Price = 32_000_000_000,
      Minimum_Money = 100,
      Minimum_Chi = 60
   },
