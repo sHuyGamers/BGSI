@@ -101,7 +101,7 @@ getgenv().ConfigsKaitun = {
    "Bald Eagle",
    "Night Staff",
    "Star Caller",
-   "Bee Egg"
+   "Bee Egg",
   },
   Craft = {
    "Lightning Rod",
@@ -129,7 +129,7 @@ getgenv().ConfigsKaitun = {
   Lock = {
    "Godly Sprinkler",
    "Master Sprinkler",
-   "Level Up Lollipop"
+   "Level Up Lollipop",
   },
  },
 
