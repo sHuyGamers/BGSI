@@ -89,7 +89,7 @@ getgenv().ConfigsKaitun = {
    ["Restocking"] = { -- Minimumthing to restock
      Max_Restocks_Price = 2_000_000_000,
      Minimum_Money = 100,
-     Minimum_Chi = 30
+     Minimum_Chi = 30,
   },
    ["Doing"] = {
      Minimum_Money = 32_000_000,
@@ -166,8 +166,8 @@ getgenv().ConfigsKaitun = {
    },
    ["Limit Upgrade"] = 5,
    ["Equip When Done"] = {
-    ["Corrupted Kodama"] = { 4, 999, 1 }
-    ["Kodama"] = { 4, 999, 1 }
+    ["Corrupted Kodama"] = { 4, 999, 1 },
+    ["Kodama"] = { 4, 999, 1 },
     ["Tanchozuru"] = { 4, 999, 2 },
     ["Blood Kiwi"] = { 2, 999, 3 },
     ["Rooster"] = { 2, 999, 4 },
