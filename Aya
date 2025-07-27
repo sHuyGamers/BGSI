@@ -208,7 +208,7 @@ getgenv().ConfigsKaitun = {
  },
 
  Webhook = {
-  UrlPet = "https://discord.com/api/webhooks/1391508517810339984/86XUCwPRBC6S1GCeJZu49wOsOm_wLhWiAi-AxrlBzHu6wM9Fa1jzoFYOoAyUq53PRaWr",
+  UrlPet = "https://discord.com/api/webhooks/1396708297091973304/7D9Wa0TEsz-hIeoG6_vnRgUe07XTLUhIT3q-sLHF3IpgKIh70jUypFV4IR6fLimtM4nu",
   UrlSeed = "",
   PcName = "money is money",
 
