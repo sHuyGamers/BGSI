@@ -68,7 +68,7 @@ getgenv().ConfigsKaitun = {
      Minimum_Chi = 30,
   },
    ["Doing"] = {
-     Minimum_Money = 32_000_000,
+     Minimum_Money = 10,
      First_Upgrade_Tree = 4,
      Maximum_Chi = 250,
    }
