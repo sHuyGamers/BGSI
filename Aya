@@ -142,9 +142,6 @@ getgenv().ConfigsKaitun = {
     ["Corrupted Kodama"] = { 4, 999, 1 },
     ["Kodama"] = { 4, 999, 1 },
     ["Tanchozuru"] = { 4, 999, 2 },
-    ["Blood Kiwi"] = { 2, 999, 3 },
-    ["Rooster"] = { 2, 999, 4 },
-    ["Chicken"] = { 1, 999, 4 },
    },
   },
   Locked = {
