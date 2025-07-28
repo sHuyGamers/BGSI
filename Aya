@@ -110,8 +110,6 @@ getgenv().ConfigsKaitun = {
   Shop = {
  "Blood Kiwi",
  "Zen Egg",
- "Raiju",
- "Zen Seed Pack",
  },
 },
 
