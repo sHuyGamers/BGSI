@@ -105,3 +105,6 @@ local function unlock_favorite_pet(partial_name)
     print("Không tìm thấy pet tên chứa:", partial_name)
     return false
 end
+
+-- Ví dụ sử dụng:
+unlock_favorite_pet("Corrupted Kitsune")
