@@ -3,28 +3,24 @@ getgenv().Select_Pet = {
     "Corrupted Kitsune",
     "Kitsune"
 }
-getgenv().Kick_After_Trade = fasle
+getgenv().Kick_After_Trade = false
 repeat task.wait() until game:IsLoaded()
 repeat task.wait() until game.Players.LocalPlayer.Character
 
 local plr = game:GetService("Players").LocalPlayer
 local VirtualUser = game:service "VirtualUser"
 
---[[if game.JobId ~= getgenv().JobId then
-    game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId, getgenv().JobId, plr)
-end]]
-
 while not (plr:GetAttribute("DataFullyLoaded") and plr:GetAttribute("Finished_Loading")) do
     task.wait()
     VirtualUser:CaptureController()
-	VirtualUser:ClickButton2(Vector2.new())
+    VirtualUser:ClickButton2(Vector2.new())
 end
 
 plr.Idled:connect(
-	function()
-		VirtualUser:CaptureController()
-		VirtualUser:ClickButton2(Vector2.new())
-	end
+    function()
+        VirtualUser:CaptureController()
+        VirtualUser:ClickButton2(Vector2.new())
+    end
 )
 
 local function check_pet(name)
@@ -35,6 +31,14 @@ local function check_pet(name)
                 return true
             end
         end
+    end
+    return false
+end
+
+-- Hàm thay thế table.find cho Lua cũ
+local function table_find(tbl, val)
+    for _, v in pairs(tbl) do
+        if v == val then return true end
     end
     return false
 end
@@ -51,7 +55,7 @@ if getgenv().Target == plr.Name then
 else
     for i, v in pairs(plr:FindFirstChild("Backpack"):GetChildren()) do
         if v:IsA("Tool") and v:GetAttribute("ItemType") == "Pet" and check_pet(v.Name) then
-            if not table.find(save, v) then
+            if not table_find(save, v) then
                 table.insert(save, v)
             end
         end
@@ -60,6 +64,7 @@ else
         for i, v in pairs(save) do
             local petTool = plr:FindFirstChild("Backpack"):FindFirstChild(v.Name)
             if petTool then
+                -- Ưu tiên kiểm tra và bỏ favorite nếu cần
                 unlock_favorite_pet(petTool)
                 local huy = game:GetService("Players"):FindFirstChild(getgenv().Target)
                 if huy then
@@ -116,6 +121,3 @@ local function unlock_favorite_pet(tool)
         return false
     end
 end
-
--- Ví dụ sử dụng:
-unlock_favorite_pet("Corrupted Kitsune")
