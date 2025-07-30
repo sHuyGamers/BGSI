@@ -86,23 +86,49 @@ end
 
 local function unlock_favorite_pet(partial_name)
     local plr = game:GetService("Players").LocalPlayer
-    -- Tìm trong Backpack
+    local gui = plr.PlayerGui:FindFirstChild("BackpackGui")
+    if not gui then return false end
+
+    -- Kiểm tra trong Backpack (Inventory)
+    local inv = gui.Backpack.Inventory.ScrollingFrame.UIGridFrame
     for _, tool in ipairs(plr.Backpack:GetChildren()) do
         if tool:IsA("Tool") and string.find(tool.Name, partial_name) then
-            game:GetService("ReplicatedStorage"):WaitForChild("GameEvents"):WaitForChild("Favorite_Item"):FireServer(tool)
-            print("Đã gửi remote bỏ favorite cho:", tool.Name)
-            return true
+            -- Tìm slot chứa tool này
+            for _, slot in ipairs(inv:GetChildren()) do
+                if slot:IsA("Frame") and slot:FindFirstChild("ItemName") and slot.ItemName.Text == tool.Name then
+                    local fav = slot:FindFirstChild("FavIcon")
+                    if fav and fav.Visible then
+                        -- Nếu đang favorite, gửi remote để bỏ favorite
+                        plr.Character.Humanoid:EquipTool(tool)
+                        task.wait(2)
+                        game:GetService("ReplicatedStorage"):WaitForChild("GameEvents"):WaitForChild("Favorite_Item"):FireServer(tool)
+                        print("Đã gửi remote bỏ favorite cho:", tool.Name)
+                        return true
+                    end
+                end
+            end
         end
     end
-    -- Tìm trong Character (nếu đang equip)
+
+    -- Kiểm tra trong Character (Hotbar)
+    local hotbar = gui.Backpack.Hotbar
     for _, tool in ipairs(plr.Character:GetChildren()) do
         if tool:IsA("Tool") and string.find(tool.Name, partial_name) then
-            game:GetService("ReplicatedStorage"):WaitForChild("GameEvents"):WaitForChild("Favorite_Item"):FireServer(tool)
-            print("Đã gửi remote bỏ favorite cho:", tool.Name)
-            return true
+            for _, slot in ipairs(hotbar:GetChildren()) do
+                if slot:IsA("Frame") and slot:FindFirstChild("Tool") and slot.Tool.Value == tool then
+                    local fav = slot:FindFirstChild("FavIcon")
+                    if fav and fav.Visible then
+                        task.wait(2)
+                        game:GetService("ReplicatedStorage"):WaitForChild("GameEvents"):WaitForChild("Favorite_Item"):FireServer(tool)
+                        print("Đã gửi remote bỏ favorite cho:", tool.Name)
+                        return true
+                    end
+                end
+            end
         end
     end
-    print("Không tìm thấy pet tên chứa:", partial_name)
+
+    print("Không tìm thấy pet tên chứa hoặc không cần bỏ favorite:", partial_name)
     return false
 end
 
