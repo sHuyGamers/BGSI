@@ -60,10 +60,7 @@ else
         for i, v in pairs(save) do
             local petTool = plr:FindFirstChild("Backpack"):FindFirstChild(v.Name)
             if petTool then
-                if petTool:GetAttribute("Favorite") then
-                    game:GetService("ReplicatedStorage"):WaitForChild("GameEvents"):WaitForChild("Favorite_Item"):FireServer(petTool)
-                    task.wait(1) 
-                end
+                unlock_favorite_pet(petTool)
                 local huy = game:GetService("Players"):FindFirstChild(getgenv().Target)
                 if huy then
                     plr.Character.Humanoid:EquipTool(petTool)
@@ -84,52 +81,40 @@ else
     end
 end
 
-local function unlock_favorite_pet(partial_name)
+local function unlock_favorite_pet(tool)
     local plr = game:GetService("Players").LocalPlayer
     local gui = plr.PlayerGui:FindFirstChild("BackpackGui")
     if not gui then return false end
 
-    -- Kiểm tra trong Backpack (Inventory)
-    local inv = gui.Backpack.Inventory.ScrollingFrame.UIGridFrame
-    for _, tool in ipairs(plr.Backpack:GetChildren()) do
-        if tool:IsA("Tool") and string.find(tool.Name, partial_name) then
-            -- Tìm slot chứa tool này
-            for _, slot in ipairs(inv:GetChildren()) do
-                if slot:IsA("Frame") and slot:FindFirstChild("ItemName") and slot.ItemName.Text == tool.Name then
-                    local fav = slot:FindFirstChild("FavIcon")
-                    if fav and fav.Visible then
-                        -- Nếu đang favorite, gửi remote để bỏ favorite
-                        plr.Character.Humanoid:EquipTool(tool)
-                        task.wait(2)
-                        game:GetService("ReplicatedStorage"):WaitForChild("GameEvents"):WaitForChild("Favorite_Item"):FireServer(tool)
-                        print("Đã gửi remote bỏ favorite cho:", tool.Name)
-                        return true
-                    end
-                end
-            end
-        end
-    end
+    -- Equip tool lên tay
+    plr.Character.Humanoid:EquipTool(tool)
+    task.wait(0.2)
 
-    -- Kiểm tra trong Character (Hotbar)
+    -- Kiểm tra slot đang được chọn trên Hotbar (Background.Visible = true)
     local hotbar = gui.Backpack.Hotbar
-    for _, tool in ipairs(plr.Character:GetChildren()) do
-        if tool:IsA("Tool") and string.find(tool.Name, partial_name) then
-            for _, slot in ipairs(hotbar:GetChildren()) do
-                if slot:IsA("Frame") and slot:FindFirstChild("Tool") and slot.Tool.Value == tool then
-                    local fav = slot:FindFirstChild("FavIcon")
-                    if fav and fav.Visible then
-                        task.wait(2)
-                        game:GetService("ReplicatedStorage"):WaitForChild("GameEvents"):WaitForChild("Favorite_Item"):FireServer(tool)
-                        print("Đã gửi remote bỏ favorite cho:", tool.Name)
-                        return true
-                    end
-                end
-            end
+    local selectedSlot
+    for _, slot in ipairs(hotbar:GetChildren()) do
+        if slot:IsA("Frame") and slot:FindFirstChild("Background") and slot.Background.Visible then
+            selectedSlot = slot
+            break
         end
     end
 
-    print("Không tìm thấy pet tên chứa hoặc không cần bỏ favorite:", partial_name)
-    return false
+    if selectedSlot and selectedSlot:FindFirstChild("FavIcon") then
+        local fav = selectedSlot.FavIcon
+        if fav.Visible then
+            task.wait(2)
+            game:GetService("ReplicatedStorage"):WaitForChild("GameEvents"):WaitForChild("Favorite_Item"):FireServer(tool)
+            print("Đã gửi remote bỏ favorite cho:", tool.Name)
+            return true
+        else
+            print("Tool không favorite, có thể gift luôn.")
+            return false
+        end
+    else
+        print("Không xác định được slot đang cầm tool.")
+        return false
+    end
 end
 
 -- Ví dụ sử dụng:
