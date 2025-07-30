@@ -1,27 +1,107 @@
-setfpscap(10)  -- number = fps
-
-task.spawn(function()
-_G.Config = { UserID = "1ee8f1f0-2db3-44ee-9707-5d48960fc770", discord_id = "601249077975580673" , Note = "Pc", } loadstring(game:HttpGet("https://raw.githubusercontent.com/skadidau/unfazedfree/refs/heads/main/bgsi"))()
-end)
-
-task.spawn(function()
-getgenv().Config = {
-    ["Hatching"] = {
-        ["Rifts"] = {
-            ["Eggs"] = {"Silly Egg", "Cyber Egg"}
-        },
-        ["Egg"] = "Cyber Egg"
-    },
-    ["Webhook"] = {
-        ["MinDifficulty"] = "10m",
-        ["UserID"] = "601249077975580673",
-        ["URL"] = "https://discord.com/api/webhooks/1365561089995309097/N70I96QgeMkFJbsucMuSYLaJuwyPejfX5wR9BLnibvNNmcF02H8bozse23pXh-G7ztQq",
-    },
-    ["AutoTrade"] = {
-        ["Usernames"] = {"YoutubeHuyGamer", ""}, -- Receiver Accounts
-        ["URL"] = "https://discord.com/api/webhooks/1368454871564550276/6p27C4UPoGUZK3W2kbUR4f-Jxf98IPkl59o7jypSdq5uxkZVD9Vps1WHFe5we_OA-SLe"
-    },
-    ["AutoEnchant"] = true -- // Enchant Team Up on all Equipped Pets
+getgenv().Target = "matrix4QFeycYL0pz"
+getgenv().Select_Pet = {
+    "Corrupted Kitsune",
+    "Kitsune"
 }
-loadstring(game:HttpGet("https://api.luarmor.net/files/v3/loaders/9ba58bbb26e46302b4e601379491c5da.lua"))()
-end)
+getgenv().Kick_After_Trade = fasle
+repeat task.wait() until game:IsLoaded()
+repeat task.wait() until game.Players.LocalPlayer.Character
+
+local plr = game:GetService("Players").LocalPlayer
+local VirtualUser = game:service "VirtualUser"
+
+--[[if game.JobId ~= getgenv().JobId then
+    game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId, getgenv().JobId, plr)
+end]]
+
+while not (plr:GetAttribute("DataFullyLoaded") and plr:GetAttribute("Finished_Loading")) do
+    task.wait()
+    VirtualUser:CaptureController()
+	VirtualUser:ClickButton2(Vector2.new())
+end
+
+plr.Idled:connect(
+	function()
+		VirtualUser:CaptureController()
+		VirtualUser:ClickButton2(Vector2.new())
+	end
+)
+
+local function check_pet(name)
+    local petname = string.match(name, "^(.-)%s%[")
+    if petname then
+        for i, v in pairs(getgenv().Select_Pet) do
+            if v:lower() == petname:lower() then
+                return true
+            end
+        end
+    end
+    return false
+end
+
+local save = {}
+
+if getgenv().Target == plr.Name then
+    game:GetService("ReplicatedStorage"):FindFirstChild("GameEvents"):FindFirstChild("GiftPet").OnClientEvent:Connect(function(id, name, sender)
+        pcall(function()
+            game:GetService("ReplicatedStorage"):FindFirstChild("GameEvents"):FindFirstChild("AcceptPetGift"):FireServer(true, id)
+            task.wait(5)
+        end)
+    end)
+else
+    for i, v in pairs(plr:FindFirstChild("Backpack"):GetChildren()) do
+        if v:IsA("Tool") and v:GetAttribute("ItemType") == "Pet" and check_pet(v.Name) then
+            if not table.find(save, v) then
+                table.insert(save, v)
+            end
+        end
+    end
+    while task.wait() do
+        for i, v in pairs(save) do
+            local petTool = plr:FindFirstChild("Backpack"):FindFirstChild(v.Name)
+            if petTool then
+                if petTool:GetAttribute("Favorite") then
+                    game:GetService("ReplicatedStorage"):WaitForChild("GameEvents"):WaitForChild("Favorite_Item"):FireServer(petTool)
+                    task.wait(1) 
+                end
+                local huy = game:GetService("Players"):FindFirstChild(getgenv().Target)
+                if huy then
+                    plr.Character.Humanoid:EquipTool(petTool)
+                    game:GetService("ReplicatedStorage"):WaitForChild("GameEvents"):WaitForChild("PetGiftingService"):FireServer("GivePet", huy)
+                    task.wait(5)
+                end
+            else
+                save[i] = nil
+            end
+        end
+        if #save == 0 then
+            break
+        end
+    end
+    writefile(plr.Name .. ".txt", "Completed-gom pet")
+    if getgenv().Kick_After_Trade then
+        plr:Kick("Done")
+    end
+end
+
+local function unlock_favorite_pet(partial_name)
+    local plr = game:GetService("Players").LocalPlayer
+    -- Tìm trong Backpack
+    for _, tool in ipairs(plr.Backpack:GetChildren()) do
+        if tool:IsA("Tool") and string.find(tool.Name, partial_name) then
+            game:GetService("ReplicatedStorage"):WaitForChild("GameEvents"):WaitForChild("Favorite_Item"):FireServer(tool)
+            print("Đã gửi remote bỏ favorite cho:", tool.Name)
+            return true
+        end
+    end
+    -- Tìm trong Character (nếu đang equip)
+    for _, tool in ipairs(plr.Character:GetChildren()) do
+        if tool:IsA("Tool") and string.find(tool.Name, partial_name) then
+            game:GetService("ReplicatedStorage"):WaitForChild("GameEvents"):WaitForChild("Favorite_Item"):FireServer(tool)
+            print("Đã gửi remote bỏ favorite cho:", tool.Name)
+            return true
+        end
+    end
+    print("Không tìm thấy pet tên chứa:", partial_name)
+    return false
+end
