@@ -3,7 +3,7 @@ getgenv().Select_Pet = {
     "Corrupted Kitsune",
     "Kitsune"
 }
-getgenv().Kick_After_Trade = true
+getgenv().Kick_After_Trade = false
 repeat task.wait() until game:IsLoaded()
 repeat task.wait() until game.Players.LocalPlayer.Character
 
