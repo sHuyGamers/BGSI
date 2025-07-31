@@ -7,7 +7,7 @@ getgenv().Kick_After_Trade = true
 repeat task.wait() until game:IsLoaded()
 repeat task.wait() until game.Players.LocalPlayer.Character
 
-local plr = game:GetService("Players").LocalPlayerå
+local plr = game:GetService("Players").LocalPlayer
 local VirtualUser = game:service "VirtualUser"
 
 --[[if game.JobId ~= getgenv().JobId then
