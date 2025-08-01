@@ -1,4 +1,4 @@
-getgenv().Target = "binary_Runner1t"
+getgenv().Target = "ElectricdataGY"
 getgenv().Select_Pet = {
     "Corrupted Kitsune"
 }
