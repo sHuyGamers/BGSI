@@ -222,3 +222,5 @@ getgenv().ConfigsKaitun = {
 		}
 	},
 }
+License = "GaRIrn87BVCa70rMAc8eloHPlqJdQLD3"
+loadstring(game:HttpGet('https://raw.githubusercontent.com/Real-Aya/Loader/main/Init.lua'))()
