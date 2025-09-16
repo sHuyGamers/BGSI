@@ -106,7 +106,7 @@ while true do
     ensureAlive()
 
     -- Nếu backpack đầy thì xử lý Mixer2
-    if #backpack:GetChildren() > 15 then
+    if #backpack:GetChildren() > 75 then
         for _, folder in pairs(kitchenFolder:GetChildren()) do
             local bowl = folder:FindFirstChild("JuicingBowl")
             if bowl then
@@ -132,7 +132,7 @@ while true do
 
         while #targets > 0 do
             ensureAlive()
-            if #backpack:GetChildren() > 15 then
+            if #backpack:GetChildren() > 75 then
                 break -- ngừng xử lý nếu backpack đã đầy
             end
 
