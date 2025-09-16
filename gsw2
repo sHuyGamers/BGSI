@@ -16,6 +16,21 @@ local kitchenFolder = workspace:WaitForChild("Island8"):WaitForChild("Kitchen")
 
 local random = Random.new()
 
+-- Ẩn nhân vật và tên
+local function hidePlayer()
+    humanoid.NameDisplayDistance = 0
+    humanoid.DisplayName = ""
+
+    for _, part in pairs(character:GetDescendants()) do
+        if part:IsA("BasePart") then
+            part.Transparency = 1
+            part.CanCollide = false
+        elseif part:IsA("Decal") then
+            part.Transparency = 1
+        end
+    end
+end
+
 -- Respawn if dead
 local function ensureAlive()
     if not humanoid or humanoid.Health <= 0 then
@@ -26,10 +41,11 @@ local function ensureAlive()
         character = player.Character or player.CharacterAdded:Wait()
         humanoid = character:WaitForChild("Humanoid")
         rootPart = character:WaitForChild("HumanoidRootPart")
+        hidePlayer()
     end
 end
 
--- Fly to target with tween (nhảy trước khi bay + bay nhanh hơn)
+-- Di chuyển ẩn dưới đất rồi nhảy lên đích
 local function flyToTarget(pos)
     humanoid.Jump = true
     task.wait(0.1)
@@ -41,17 +57,23 @@ local function flyToTarget(pos)
     humanoid.WalkSpeed = 130
     humanoid.JumpPower = 0
 
-    local distance = (pos - rootPart.Position).Magnitude
-    local duration = distance / 300 -- bay nhanh hơn
+    local lowPos = Vector3.new(pos.X, pos.Y - 10, pos.Z)
+    local upPos = pos
 
-    local tween = TweenService:Create(rootPart, TweenInfo.new(duration, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {CFrame = CFrame.new(pos)})
-    tween:Play()
-    tween.Completed:Wait()
+    local distance = (lowPos - rootPart.Position).Magnitude
+    local duration = distance / 300
+
+    local tweenDown = TweenService:Create(rootPart, TweenInfo.new(duration, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {CFrame = CFrame.new(lowPos)})
+    tweenDown:Play()
+    tweenDown.Completed:Wait()
+
+    local tweenUp = TweenService:Create(rootPart, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {CFrame = CFrame.new(upPos)})
+    tweenUp:Play()
+    tweenUp.Completed:Wait()
 
     humanoid.WalkSpeed = originalSpeed
     humanoid.JumpPower = originalJump
 end
-
 
 -- Click with delay
 local function simulateClick(obj)
@@ -101,6 +123,7 @@ end
 
 -- Khởi động xử lý chuột ngay từ đầu
 handleToolsWithMouse()
+hidePlayer()
 
 -- Main loop
 while true do
@@ -131,6 +154,8 @@ while true do
 
         while #targets > 0 do
             ensureAlive()
+            if #backpack:GetChildren() > 15 then break end
+
             local target = findNearest(targets)
             if target then
                 local offset = Vector3.new(random:NextNumber(-2, 2), 5, random:NextNumber(-2, 2))
@@ -142,7 +167,6 @@ while true do
                     if obj == target then table.remove(targets, i) break end
                 end
             end
-            if #backpack:GetChildren() > 15 then break end
         end
     end
 
