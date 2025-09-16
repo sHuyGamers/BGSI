@@ -10,14 +10,11 @@ local random = Random.new()
 local runService = game:GetService("RunService")
 local tweenService = game:GetService("TweenService")
 
--- Function to simulate smooth flying movement toward a target, positioning near the "tail"
+-- Function to simulate smooth flying movement toward a target
 local function flyToTarget(targetPosition)
-    -- Assume target is a 1-3 unit object, fly to the "tail" (e.g., +3 units on Z-axis) and slightly below ground
-    local tailOffset = Vector3.new(0, -random:NextNumber(0.5, 1.5), 3) -- Slight dip below ground (0.5-1.5) and 3 units toward tail
-    local finalPosition = targetPosition + tailOffset + Vector3.new(random:NextNumber(-1, 1), 0, random:NextNumber(-0.5, 0.5)) -- Slight jitter
     local startPosition = humanoidRootPart.Position
-    local distance = (finalPosition - startPosition).Magnitude
-    local flightTime = distance / (humanoid.WalkSpeed * random:NextNumber(1.5, 2.5)) -- Variable flight speed
+    local distance = (targetPosition - startPosition).Magnitude
+    local flightTime = distance / (humanoid.WalkSpeed * random:NextNumber(1.5, 2.5)) -- Variable flight speed based on walk speed
 
     -- Temporarily increase fly speed and disable jumping
     local originalWalkSpeed = humanoid.WalkSpeed
@@ -25,9 +22,9 @@ local function flyToTarget(targetPosition)
     humanoid.WalkSpeed = random:NextNumber(50, 80) -- Faster for flying
     humanoid.JumpPower = 0 -- No jumping
 
-    -- Use Tween for smooth movement
+    -- Use Tween for smooth flying movement
     local tweenInfo = TweenInfo.new(flightTime, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut)
-    local tween = tweenService:Create(humanoidRootPart, tweenInfo, {CFrame = CFrame.new(finalPosition)})
+    local tween = tweenService:Create(humanoidRootPart, tweenInfo, {CFrame = CFrame.new(targetPosition)})
     tween:Play()
     tween.Completed:Wait()
 
@@ -39,14 +36,12 @@ end
 -- Function to simulate a single click with human-like delay
 local function simulateClick(target)
     if target and target:FindFirstChild("ClickDetector") then
-        local originalMaxDistance = target.ClickDetector.MaxActivationDistance
-        target.ClickDetector.MaxActivationDistance = math.max(originalMaxDistance, 5) -- Slight increase for close proximity
         wait(random:NextNumber(0.2, 0.5)) -- Random delay before click
+        -- Attempt to use mouse simulation (limited effectiveness)
         local mouse = player:GetMouse()
         mouse.Button1Down:FireServer(target.ClickDetector)
         wait(random:NextNumber(0.1, 0.3)) -- Post-click delay
         fireclickdetector(target.ClickDetector) -- Fallback
-        target.ClickDetector.MaxActivationDistance = originalMaxDistance -- Revert
     end
 end
 
@@ -59,7 +54,7 @@ while true do
             if folder:FindFirstChild("JuicingBowl") then
                 local mixer2 = folder.JuicingBowl:FindFirstChild("Mixer2")
                 if mixer2 and mixer2:FindFirstChild("ClickDetector") then
-                    local targetPosition = mixer2.Position + Vector3.new(random:NextNumber(-2, 2), 0, random:NextNumber(-2, 2))
+                    local targetPosition = mixer2.Position + Vector3.new(random:NextNumber(-2, 2), 5, random:NextNumber(-2, 2))
                     flyToTarget(targetPosition)
                     wait(random:NextNumber(0.5, 1.5))
                     simulateClick(mixer2)
@@ -71,7 +66,7 @@ while true do
         -- Handle Barrels with continuous Backpack check
         for _, barrel in pairs(barrelsFolder:GetChildren()) do
             if barrel:FindFirstChild("ClickDetector") then
-                local targetPosition = barrel.Position + Vector3.new(random:NextNumber(-2, 2), 0, random:NextNumber(-2, 2))
+                local targetPosition = barrel.Position + Vector3.new(random:NextNumber(-2, 2), 5, random:NextNumber(-2, 2))
                 flyToTarget(targetPosition)
                 wait(random:NextNumber(0.1, 0.5))
                 simulateClick(barrel)
@@ -83,7 +78,7 @@ while true do
         -- Handle Crates with continuous Backpack check
         for _, crate in pairs(cratesFolder:GetChildren()) do
             if crate:FindFirstChild("ClickDetector") then
-                local targetPosition = crate.Position + Vector3.new(random:NextNumber(-2, 2), 0, random:NextNumber(-2, 2))
+                local targetPosition = crate.Position + Vector3.new(random:NextNumber(-2, 2), 5, random:NextNumber(-2, 2))
                 flyToTarget(targetPosition)
                 wait(random:NextNumber(0.5, 1.5))
                 simulateClick(crate)
@@ -97,7 +92,7 @@ while true do
             if folder:FindFirstChild("JuicingBowl") then
                 local mixer2 = folder.JuicingBowl:FindFirstChild("Mixer2")
                 if mixer2 and mixer2:FindFirstChild("ClickDetector") then
-                    local targetPosition = mixer2.Position + Vector3.new(random:NextNumber(-2, 2), 0, random:NextNumber(-2, 2))
+                    local targetPosition = mixer2.Position + Vector3.new(random:NextNumber(-2, 2), 5, random:NextNumber(-2, 2))
                     flyToTarget(targetPosition)
                     wait(random:NextNumber(0.5, 1.5))
                     simulateClick(mixer2)
