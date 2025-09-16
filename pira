@@ -1,13 +1,44 @@
-
-
 local barrelsFolder = workspace:WaitForChild("Barrels"):WaitForChild("Barrels")
 local cratesFolder = workspace:WaitForChild("Barrels"):WaitForChild("Crates")
 local kitchenFolder = workspace:WaitForChild("Island8"):WaitForChild("Kitchen")
 local player = game:GetService("Players").LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
+local humanoid = character:WaitForChild("Humanoid")
 local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
 local backpack = player:WaitForChild("Backpack")
 local random = Random.new()
+local tweenService = game:GetService("TweenService")
+
+-- Function to simulate smooth flying movement toward a target
+local function flyToTarget(targetPosition)
+    local startPosition = humanoidRootPart.Position
+    local distance = (targetPosition - startPosition).Magnitude
+    local flightTime = distance / (humanoid.WalkSpeed * random:NextNumber(3.0, 4.0)) -- Faster flight speed (3x to 4x walk speed)
+
+    -- Temporarily increase fly speed and disable jumping
+    local originalWalkSpeed = humanoid.WalkSpeed
+    local originalJumpPower = humanoid.JumpPower
+    humanoid.WalkSpeed = random:NextNumber(50, 80) -- Faster for flying
+    humanoid.JumpPower = 0 -- No jumping
+
+    -- Use Tween for smooth flying movement
+    local tweenInfo = TweenInfo.new(flightTime, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut)
+    local tween = tweenService:Create(humanoidRootPart, tweenInfo, {CFrame = CFrame.new(targetPosition)})
+    tween:Play()
+    tween.Completed:Wait()
+
+    -- Revert properties
+    humanoid.WalkSpeed = originalWalkSpeed
+    humanoid.JumpPower = originalJumpPower
+end
+
+-- Function to simulate a single click with human-like delay
+local function simulateClick(target)
+    if target and target:FindFirstChild("ClickDetector") then
+        wait(random:NextNumber(0.2, 0.5)) -- Random delay before click
+        fireclickdetector(target.ClickDetector) -- Use fireclickdetector directly
+    end
+end
 
 while true do
     -- Continuously check Backpack count during processing
@@ -21,9 +52,10 @@ while true do
                 if mixer2 and mixer2:FindFirstChild("ClickDetector") then
                     local offsetX = random:NextNumber(-2, 2)
                     local offsetZ = random:NextNumber(-2, 2)
-                    humanoidRootPart.CFrame = CFrame.new(mixer2.Position + Vector3.new(offsetX, 5, offsetZ))
+                    local targetPosition = mixer2.Position + Vector3.new(offsetX, 5, offsetZ)
+                    flyToTarget(targetPosition)
                     wait(random:NextNumber(0.5, 1.5))
-                    fireclickdetector(mixer2.ClickDetector)
+                    simulateClick(mixer2)
                 end
             end
         end
@@ -33,9 +65,10 @@ while true do
             if barrel:FindFirstChild("ClickDetector") then
                 local offsetX = random:NextNumber(-2, 2)
                 local offsetZ = random:NextNumber(-2, 2)
-                humanoidRootPart.CFrame = CFrame.new(barrel.Position + Vector3.new(offsetX, 5, offsetZ))
+                local targetPosition = barrel.Position + Vector3.new(offsetX, 5, offsetZ)
+                flyToTarget(targetPosition)
                 wait(random:NextNumber(0.1, 0.5))
-                fireclickdetector(barrel.ClickDetector)
+                simulateClick(barrel)
                 if #backpack:GetChildren() > 15 then break end -- Switch to Mixer2 if condition met
             end
         end
@@ -45,9 +78,10 @@ while true do
             if crate:FindFirstChild("ClickDetector") then
                 local offsetX = random:NextNumber(-2, 2)
                 local offsetZ = random:NextNumber(-2, 2)
-                humanoidRootPart.CFrame = CFrame.new(crate.Position + Vector3.new(offsetX, 5, offsetZ))
+                local targetPosition = crate.Position + Vector3.new(offsetX, 5, offsetZ)
+                flyToTarget(targetPosition)
                 wait(random:NextNumber(0.5, 1.5))
-                fireclickdetector(crate.ClickDetector)
+                simulateClick(crate)
                 if #backpack:GetChildren() > 15 then break end -- Switch to Mixer2 if condition met
             end
         end
@@ -59,9 +93,10 @@ while true do
                 if mixer2 and mixer2:FindFirstChild("ClickDetector") then
                     local offsetX = random:NextNumber(-2, 2)
                     local offsetZ = random:NextNumber(-2, 2)
-                    humanoidRootPart.CFrame = CFrame.new(mixer2.Position + Vector3.new(offsetX, 5, offsetZ))
+                    local targetPosition = mixer2.Position + Vector3.new(offsetX, 5, offsetZ)
+                    flyToTarget(targetPosition)
                     wait(random:NextNumber(0.5, 1.5))
-                    fireclickdetector(mixer2.ClickDetector)
+                    simulateClick(mixer2)
                 end
             end
         end
