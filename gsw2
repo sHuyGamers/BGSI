@@ -8,13 +8,21 @@ local backpack = player:WaitForChild("Backpack")
 local character = player.Character or player.CharacterAdded:Wait()
 local humanoid = character:WaitForChild("Humanoid")
 local rootPart = character:WaitForChild("HumanoidRootPart")
+local mouse = player:GetMouse()
 
 local barrelsFolder = workspace:WaitForChild("Barrels"):WaitForChild("Barrels")
 local cratesFolder = workspace:WaitForChild("Barrels"):WaitForChild("Crates")
 local kitchenFolder = workspace:WaitForChild("Island8"):WaitForChild("Kitchen")
 
 local random = Random.new()
-local mouse = player:GetMouse()
+
+-- Ngăn nhân vật bị ngồi dính
+local function antiSit()
+    if humanoid.Sit then
+        humanoid.Sit = false
+        task.wait(0.1)
+    end
+end
 
 -- Respawn if dead
 local function ensureAlive()
@@ -27,6 +35,7 @@ local function ensureAlive()
         humanoid = character:WaitForChild("Humanoid")
         rootPart = character:WaitForChild("HumanoidRootPart")
     end
+    antiSit()
 end
 
 -- Fly to target with tween
@@ -46,6 +55,7 @@ local function flyToTarget(pos)
 
     humanoid.WalkSpeed = originalSpeed
     humanoid.JumpPower = originalJump
+    antiSit()
 end
 
 -- Click with delay
@@ -53,6 +63,7 @@ local function simulateClick(obj)
     if obj and obj:FindFirstChild("ClickDetector") then
         task.wait(random:NextNumber(0.2, 0.5))
         fireclickdetector(obj.ClickDetector)
+        antiSit()
     end
 end
 
@@ -63,6 +74,7 @@ local function antiAfk()
     humanoid.Jump = false
     humanoid:Move(Vector3.new(random:NextNumber(-5, 5), 0, random:NextNumber(-5, 5)), true)
     task.wait(0.2)
+    antiSit()
 end
 
 -- Find nearest object
@@ -78,27 +90,27 @@ local function findNearest(list)
     return closest
 end
 
--- Handle tools with mouse click
+-- Handle tools when mouse is clicked
 local function handleToolsWithMouse()
-    UserInputService.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            for _, tool in pairs(backpack:GetChildren()) do
-                if tool:IsA("Tool") and (tool.Name:lower():find("juice") or tool.Name:lower():find("milk")) then
-                    humanoid:EquipTool(tool)
-                    task.wait(0.2)
-                    if tool:FindFirstChild("ClickDetector") then
-                        fireclickdetector(tool.ClickDetector)
-                        task.wait(0.1)
-                    end
+    mouse.Button1Down:Connect(function()
+        for _, tool in pairs(backpack:GetChildren()) do
+            if tool:IsA("Tool") and (tool.Name:lower():find("juice") or tool.Name:lower():find("milk")) then
+                humanoid:EquipTool(tool)
+                task.wait(0.2)
+                if tool:FindFirstChild("ClickDetector") then
+                    fireclickdetector(tool.ClickDetector)
+                    task.wait(0.1)
+                    antiSit()
                 end
             end
         end
     end)
 end
 
--- Main loop
-handleToolsWithMouse() -- Start listening for mouse input
+-- Khởi động xử lý chuột ngay từ đầu
+handleToolsWithMouse()
 
+-- Main loop
 while true do
     ensureAlive()
 
