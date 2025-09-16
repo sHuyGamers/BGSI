@@ -16,6 +16,38 @@ local kitchenFolder = workspace:WaitForChild("Island8"):WaitForChild("Kitchen")
 
 local random = Random.new()
 
+-- Tạo UI hiển thị số lượng tool
+local gui = Instance.new("ScreenGui")
+gui.Name = "ToolCounterGui"
+gui.ResetOnSpawn = false
+gui.Parent = player:WaitForChild("PlayerGui")
+
+local label = Instance.new("TextLabel")
+label.Size = UDim2.new(0, 200, 0, 50)
+label.Position = UDim2.new(0.5, -100, 0.05, 0)
+label.BackgroundTransparency = 1
+label.TextScaled = true
+label.Font = Enum.Font.GothamBold
+label.TextColor3 = Color3.new(1, 1, 1)
+label.TextStrokeTransparency = 0.5
+label.Text = "Tools: 0"
+label.Parent = gui
+
+-- Vòng lặp cập nhật số lượng tool
+task.spawn(function()
+    while true do
+        local count = 0
+        for _, item in pairs(backpack:GetChildren()) do
+            if item:IsA("Tool") then
+                count += 1
+            end
+        end
+        label.Text = "Tools: " .. count
+        label.TextColor3 = count > 70 and Color3.fromRGB(255, 100, 100) or Color3.new(1, 1, 1)
+        task.wait(0.5)
+    end
+end)
+
 -- Respawn if dead
 local function ensureAlive()
     if not humanoid or humanoid.Health <= 0 then
@@ -42,7 +74,7 @@ local function flyToTarget(pos)
     humanoid.JumpPower = 0
 
     local distance = (pos - rootPart.Position).Magnitude
-    local duration = distance / 300 -- bay nhanh hơn
+    local duration = distance / 300
 
     local tween = TweenService:Create(rootPart, TweenInfo.new(duration, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {CFrame = CFrame.new(pos)})
     tween:Play()
@@ -98,14 +130,12 @@ local function handleToolsWithMouse()
     end)
 end
 
--- Khởi động xử lý chuột ngay từ đầu
 handleToolsWithMouse()
 
 -- Main loop
 while true do
     ensureAlive()
 
-    -- Nếu backpack đầy thì xử lý Mixer2
     if #backpack:GetChildren() > 75 then
         for _, folder in pairs(kitchenFolder:GetChildren()) do
             local bowl = folder:FindFirstChild("JuicingBowl")
@@ -121,7 +151,6 @@ while true do
             end
         end
     else
-        -- Nếu chưa đầy thì xử lý barrel/crate
         local targets = {}
         for _, obj in pairs(barrelsFolder:GetChildren()) do
             if obj:FindFirstChild("ClickDetector") then table.insert(targets, obj) end
@@ -132,9 +161,7 @@ while true do
 
         while #targets > 0 do
             ensureAlive()
-            if #backpack:GetChildren() > 75 then
-                break -- ngừng xử lý nếu backpack đã đầy
-            end
+            if #backpack:GetChildren() > 75 then break end
 
             local target = findNearest(targets)
             if target then
