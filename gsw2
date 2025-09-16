@@ -40,23 +40,21 @@ local function simulateClick(target)
     end
 end
 
--- Function to find the nearest target from a folder
-local function findNearestTarget(folder)
-    local nearestTarget = nil
+-- Function to find the nearest target from a list
+local function findNearestTargetFromList(targetList)
+    local nearest = nil
     local minDistance = math.huge
     local currentPosition = humanoidRootPart.Position
 
-    for _, object in pairs(folder:GetChildren()) do
-        if object:FindFirstChild("ClickDetector") then
-            local distance = (object.Position - currentPosition).Magnitude
-            if distance < minDistance then
-                minDistance = distance
-                nearestTarget = object
-            end
+    for _, object in pairs(targetList) do
+        local distance = (object.Position - currentPosition).Magnitude
+        if distance < minDistance then
+            minDistance = distance
+            nearest = object
         end
     end
 
-    return nearestTarget
+    return nearest
 end
 
 while true do
@@ -79,30 +77,42 @@ while true do
             end
         end
     else
-        -- Handle the nearest Barrel
-        local nearestBarrel = findNearestTarget(barrelsFolder)
-        if nearestBarrel and nearestBarrel:FindFirstChild("ClickDetector") then
-            local offsetX = random:NextNumber(-2, 2)
-            local offsetZ = random:NextNumber(-2, 2)
-            local targetPosition = nearestBarrel.Position + Vector3.new(offsetX, 5, offsetZ)
-            flyToTarget(targetPosition)
-            wait(random:NextNumber(0.1, 0.5))
-            simulateClick(nearestBarrel)
-            if #backpack:GetChildren() > 15 then break end -- Switch to Mixer2 if condition met
+        -- Collect all barrels and crates as targets
+        local targets = {}
+        for _, barrel in pairs(barrelsFolder:GetChildren()) do
+            if barrel:FindFirstChild("ClickDetector") then
+                table.insert(targets, barrel)
+            end
+        end
+        for _, crate in pairs(cratesFolder:GetChildren()) do
+            if crate:FindFirstChild("ClickDetector") then
+                table.insert(targets, crate)
+            end
         end
 
-        -- Handle the nearest Crate
-        local nearestCrate = findNearestTarget(cratesFolder)
-        if nearestCrate and nearestCrate:FindFirstChild("ClickDetector") then
-            local offsetX = random:NextNumber(-2, 2)
-            local offsetZ = random:NextNumber(-2, 2)
-            local targetPosition = nearestCrate.Position + Vector3.new(offsetX, 5, offsetZ)
-            flyToTarget(targetPosition)
-            wait(random:NextNumber(0.5, 1.5))
-            simulateClick(nearestCrate)
+        -- Process all targets by repeatedly selecting the nearest one
+        while #targets > 0 do
+            local nearestTarget = findNearestTargetFromList(targets)
+            if nearestTarget then
+                local offsetX = random:NextNumber(-2, 2)
+                local offsetZ = random:NextNumber(-2, 2)
+                local targetPosition = nearestTarget.Position + Vector3.new(offsetX, 5, offsetZ)
+                flyToTarget(targetPosition)
+                wait(random:NextNumber(0.1, 0.5))
+                simulateClick(nearestTarget)
+
+                -- Remove the processed target from the list
+                for i, t in pairs(targets) do
+                    if t == nearestTarget then
+                        table.remove(targets, i)
+                        break
+                    end
+                end
+            end
+
             if #backpack:GetChildren() > 15 then break end -- Switch to Mixer2 if condition met
         end
-
+        
         -- Handle Mixer2 in Kitchen folders
         for _, folder in pairs(kitchenFolder:GetChildren()) do
             if folder:FindFirstChild("JuicingBowl") then
@@ -118,6 +128,6 @@ while true do
             end
         end
     end
-
+    
     wait(10) -- Wait 10 seconds before repeating the cycle
 end
