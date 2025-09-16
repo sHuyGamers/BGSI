@@ -1,123 +1,85 @@
-getgenv().Target = "ElectricdataGY"
-getgenv().Select_Pet = {
-    "Corrupted Kitsune",
-    "Kitsune"
-}
-getgenv().Kick_After_Trade = false
-repeat task.wait() until game:IsLoaded()
-repeat task.wait() until game.Players.LocalPlayer.Character
+local barrelsFolder = workspace.Barrels.Barrels
+local cratesFolder = workspace.Barrels.Crates
+local kitchenFolder = workspace.Island8.Kitchen
+local player = game:GetService("Players").LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+local backpack = player:WaitForChild("Backpack")
+local random = Random.new()
+local humanoid = character:WaitForChild("Humanoid")
 
-local plr = game:GetService("Players").LocalPlayer
-local VirtualUser = game:service "VirtualUser"
-
-while not (plr:GetAttribute("DataFullyLoaded") and plr:GetAttribute("Finished_Loading")) do
-    task.wait()
-    VirtualUser:CaptureController()
-    VirtualUser:ClickButton2(Vector2.new())
-end
-
-plr.Idled:connect(
-    function()
-        VirtualUser:CaptureController()
-        VirtualUser:ClickButton2(Vector2.new())
-    end
-)
-
-local function check_pet(name)
-    local petname = string.match(name, "^(.-)%s%[")
-    if petname then
-        for i, v in pairs(getgenv().Select_Pet) do
-            if v:lower() == petname:lower() then
-                return true
+while true do
+    for _, tool in pairs(backpack:GetChildren()) do
+        if string.find(string.lower(tool.Name), "juice") or string.find(string.lower(tool.Name), "milk") then
+            humanoid:EquipTool(tool)
+            wait(0.2)
+            
+            -- Example: Assume ClickDetector is on a target part (replace with actual path)
+            local targetPart = workspace:WaitForChild("Targets"):WaitForChild("JuiceTarget") -- Adjust this path
+            if targetPart and targetPart:FindFirstChild("ClickDetector") then
+                humanoidRootPart.CFrame = CFrame.new(targetPart.Position + Vector3.new(0, 5, 0))
+                wait(math.random(0.3, 1.0))
+                fireclickdetector(targetPart.ClickDetector)
             end
         end
     end
-    return false
+    wait(math.random(0.5, 2.0))
 end
 
--- Hàm thay thế table.find cho Lua cũ
-local function table_find(tbl, val)
-    for _, v in pairs(tbl) do
-        if v == val then return true end
-    end
-    return false
-end
 
-local save = {}
-
-if getgenv().Target == plr.Name then
-    game:GetService("ReplicatedStorage"):FindFirstChild("GameEvents"):FindFirstChild("GiftPet").OnClientEvent:Connect(function(id, name, sender)
-        pcall(function()
-            game:GetService("ReplicatedStorage"):FindFirstChild("GameEvents"):FindFirstChild("AcceptPetGift"):FireServer(true, id)
-            task.wait(5)
-        end)
-    end)
-else
-    for i, v in pairs(plr:FindFirstChild("Backpack"):GetChildren()) do
-        if v:IsA("Tool") and v:GetAttribute("ItemType") == "Pet" and check_pet(v.Name) then
-            if not table_find(save, v) then
-                table.insert(save, v)
-            end
-        end
-    end
-    while task.wait() do
-        for i, v in pairs(save) do
-            local petTool = plr:FindFirstChild("Backpack"):FindFirstChild(v.Name)
-            if petTool then
-                -- Ưu tiên kiểm tra và bỏ favorite nếu cần
-                unlock_favorite_pet(petTool)
-                local huy = game:GetService("Players"):FindFirstChild(getgenv().Target)
-                if huy then
-                    plr.Character.Humanoid:EquipTool(petTool)
-                    game:GetService("ReplicatedStorage"):WaitForChild("GameEvents"):WaitForChild("PetGiftingService"):FireServer("GivePet", huy)
-                    task.wait(5)
+while true do
+    -- Check Backpack for more than 30 tools
+    if #backpack:GetChildren() > 30 then
+        -- Handle Mixer2 in Kitchen folders
+        for _, folder in pairs(kitchenFolder:GetChildren()) do
+            if folder:FindFirstChild("JuicingBowl") then
+                local mixer2 = folder.JuicingBowl:FindFirstChild("Mixer2")
+                if mixer2 and mixer2:FindFirstChild("ClickDetector") then
+                    local offsetX = random:NextNumber(-2, 2)
+                    local offsetZ = random:NextNumber(-2, 2)
+                    humanoidRootPart.CFrame = CFrame.new(mixer2.Position + Vector3.new(offsetX, 5, offsetZ))
+                    wait(random:NextNumber(0.5, 1.5))
+                    fireclickdetector(mixer2.ClickDetector)
                 end
-            else
-                save[i] = nil
             end
-        end
-        if #save == 0 then
-            break
-        end
-    end
-    writefile(plr.Name .. ".txt", "Completed-gom pet")
-    if getgenv().Kick_After_Trade then
-        plr:Kick("Done")
-    end
-end
-
-local function unlock_favorite_pet(tool)
-    local plr = game:GetService("Players").LocalPlayer
-    local gui = plr.PlayerGui:FindFirstChild("BackpackGui")
-    if not gui then return false end
-
-    -- Equip tool lên tay
-    plr.Character.Humanoid:EquipTool(tool)
-    task.wait(0.2)
-
-    -- Kiểm tra slot đang được chọn trên Hotbar (Background.Visible = true)
-    local hotbar = gui.Backpack.Hotbar
-    local selectedSlot
-    for _, slot in ipairs(hotbar:GetChildren()) do
-        if slot:IsA("Frame") and slot:FindFirstChild("Background") and slot.Background.Visible then
-            selectedSlot = slot
-            break
-        end
-    end
-
-    if selectedSlot and selectedSlot:FindFirstChild("FavIcon") then
-        local fav = selectedSlot.FavIcon
-        if fav.Visible then
-            task.wait(2)
-            game:GetService("ReplicatedStorage"):WaitForChild("GameEvents"):WaitForChild("Favorite_Item"):FireServer(tool)
-            print("Đã gửi remote bỏ favorite cho:", tool.Name)
-            return true
-        else
-            print("Tool không favorite, có thể gift luôn.")
-            return false
         end
     else
-        print("Không xác định được slot đang cầm tool.")
-        return false
+        -- Handle Barrels
+        for _, barrel in pairs(barrelsFolder:GetChildren()) do
+            if barrel:FindFirstChild("ClickDetector") then
+                local offsetX = random:NextNumber(-2, 2)
+                local offsetZ = random:NextNumber(-2, 2)
+                humanoidRootPart.CFrame = CFrame.new(barrel.Position + Vector3.new(offsetX, 5, offsetZ))
+                wait(random:NextNumber(0.1, 0.5))
+                fireclickdetector(barrel.ClickDetector)
+            end
+        end
+        
+        -- Handle Crates
+        for _, crate in pairs(cratesFolder:GetChildren()) do
+            if crate:FindFirstChild("ClickDetector") then
+                local offsetX = random:NextNumber(-2, 2)
+                local offsetZ = random:NextNumber(-2, 2)
+                humanoidRootPart.CFrame = CFrame.new(crate.Position + Vector3.new(offsetX, 5, offsetZ))
+                wait(random:NextNumber(0.5, 1.5))
+                fireclickdetector(crate.ClickDetector)
+            end
+        end
+        
+        -- Handle Mixer2 in Kitchen folders
+        for _, folder in pairs(kitchenFolder:GetChildren()) do
+            if folder:FindFirstChild("JuicingBowl") then
+                local mixer2 = folder.JuicingBowl:FindFirstChild("Mixer2")
+                if mixer2 and mixer2:FindFirstChild("ClickDetector") then
+                    local offsetX = random:NextNumber(-2, 2)
+                    local offsetZ = random:NextNumber(-2, 2)
+                    humanoidRootPart.CFrame = CFrame.new(mixer2.Position + Vector3.new(offsetX, 5, offsetZ))
+                    wait(random:NextNumber(0.5, 1.5))
+                    fireclickdetector(mixer2.ClickDetector)
+                end
+            end
+        end
     end
+    
+    wait(10) -- Wait 10 seconds before repeating the cycle
 end
