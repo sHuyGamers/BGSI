@@ -10,15 +10,16 @@ local random = Random.new()
 local runService = game:GetService("RunService")
 local tweenService = game:GetService("TweenService")
 
--- Function to simulate smooth flying movement toward a target underground
+-- Function to simulate smooth flying movement toward a target, positioning near the "tail"
 local function flyToTarget(targetPosition)
-    local undergroundOffset = Vector3.new(0, -10 - random:NextNumber(0, 5), 0) -- Random depth between -10 and -15 to vary
-    local finalPosition = targetPosition + undergroundOffset + Vector3.new(random:NextNumber(-1, 1), 0, random:NextNumber(-1, 1)) -- Slight horizontal jitter
+    -- Assume target is a 1-3 unit object, fly to the "tail" (e.g., +3 units on Z-axis) and slightly below ground
+    local tailOffset = Vector3.new(0, -random:NextNumber(0.5, 1.5), 3) -- Slight dip below ground (0.5-1.5) and 3 units toward tail
+    local finalPosition = targetPosition + tailOffset + Vector3.new(random:NextNumber(-1, 1), 0, random:NextNumber(-0.5, 0.5)) -- Slight jitter
     local startPosition = humanoidRootPart.Position
     local distance = (finalPosition - startPosition).Magnitude
-    local flightTime = distance / (humanoid.WalkSpeed * random:NextNumber(1.5, 2.5)) -- Simulate variable flight speed
+    local flightTime = distance / (humanoid.WalkSpeed * random:NextNumber(1.5, 2.5)) -- Variable flight speed
 
-    -- Temporarily increase fly speed and disable collision if needed (revert after)
+    -- Temporarily increase fly speed and disable jumping
     local originalWalkSpeed = humanoid.WalkSpeed
     local originalJumpPower = humanoid.JumpPower
     humanoid.WalkSpeed = random:NextNumber(50, 80) -- Faster for flying
@@ -39,7 +40,7 @@ end
 local function simulateClick(target)
     if target and target:FindFirstChild("ClickDetector") then
         local originalMaxDistance = target.ClickDetector.MaxActivationDistance
-        target.ClickDetector.MaxActivationDistance = math.max(originalMaxDistance, 20) -- Temporarily increase if needed for underground
+        target.ClickDetector.MaxActivationDistance = math.max(originalMaxDistance, 5) -- Slight increase for close proximity
         wait(random:NextNumber(0.2, 0.5)) -- Random delay before click
         local mouse = player:GetMouse()
         mouse.Button1Down:FireServer(target.ClickDetector)
