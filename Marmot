@@ -1,10 +1,10 @@
 getgenv().Config = {
-    ["MaxTools"] = 75, -- Maximum tools before processing
+    ["MaxTools"] = 20, -- Maximum tools before processing (used for UI color change only)
     ["FlySpeed"] = 300, -- Speed for flying to targets
     ["ClickDelayMin"] = 0.2, -- Minimum click delay
     ["ClickDelayMax"] = 0.5, -- Maximum click delay
     ["AntiAfkInterval"] = 0.5, -- Interval for anti-AFK movements
-    ["LoopDelay"] = 10 -- Delay for main loop
+    ["LoopDelay"] = 10 -- Delay for main loop (optional, can be adjusted)
 }
 
 -- Wait for game to load and key components
@@ -17,22 +17,24 @@ until game:GetService("Players").LocalPlayer and game:GetService("Players").Loca
       game:GetService("Players").LocalPlayer.Backpack and workspace
 
 -- Services
-game:GetService("Players").LocalPlayer.Idled:Connect(function()
-    local virtualUser = game:GetService("VirtualUser")
-    if virtualUser then
-        pcall(function()
-            virtualUser:CaptureController()
-            virtualUser:ClickButton2(Vector2.new())
-        end)
-    end
-end)
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+local VirtualInputManager = game:GetService("VirtualInputManager")
+local TweenService = game:GetService("TweenService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local player = Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoid = character:WaitForChild("Humanoid")
+local rootPart = character:WaitForChild("HumanoidRootPart")
+local backpack = player:WaitForChild("Backpack")
 
 -- Create UI for tool count
-if not game:GetService("Players").LocalPlayer.PlayerGui:FindFirstChild("ToolCounterGui") then
+if not player.PlayerGui:FindFirstChild("ToolCounterGui") then
     local gui = Instance.new("ScreenGui")
     gui.Name = "ToolCounterGui"
     gui.ResetOnSpawn = false
-    gui.Parent = game:GetService("Players").LocalPlayer.PlayerGui
+    gui.Parent = player.PlayerGui
 
     local label = Instance.new("TextLabel")
     label.Size = UDim2.new(0, 200, 0, 50)
@@ -49,19 +51,16 @@ end
 -- Update tool count UI
 spawn(function()
     while true do
-        local player = game:GetService("Players").LocalPlayer
-        if player and player.Backpack then
-            local count = 0
-            for _, item in pairs(player.Backpack:GetChildren()) do
-                if item:IsA("Tool") then
-                    count += 1
-                end
+        local count = 0
+        for _, item in pairs(backpack:GetChildren()) do
+            if item:IsA("Tool") then
+                count += 1
             end
-            local gui = player.PlayerGui:FindFirstChild("ToolCounterGui")
-            if gui and gui:FindFirstChild("TextLabel") then
-                gui.TextLabel.Text = "Tools: " .. count
-                gui.TextLabel.TextColor3 = count > 70 and Color3.fromRGB(255, 100, 100) or Color3.new(1, 1, 1)
-            end
+        end
+        local gui = player.PlayerGui:FindFirstChild("ToolCounterGui")
+        if gui and gui:FindFirstChild("TextLabel") then
+            gui.TextLabel.Text = "Tools: " .. count
+            gui.TextLabel.TextColor3 = count > 70 and Color3.fromRGB(255, 100, 100) or Color3.new(1, 1, 1)
         end
         task.wait(0.5)
     end
@@ -69,7 +68,6 @@ end)
 
 -- Function to check if player is alive
 function isAlive()
-    local player = game:GetService("Players").LocalPlayer
     return player.Character and player.Character:FindFirstChild("Humanoid") and player.Character.Humanoid.Health > 0
 end
 
@@ -77,28 +75,37 @@ end
 function ensureAlive()
     if not isAlive() then
         pcall(function()
-            game:GetService("ReplicatedStorage"):WaitForChild("Connections"):WaitForChild("Spawn"):FireServer(1)
+            ReplicatedStorage:WaitForChild("Connections"):WaitForChild("Spawn"):FireServer(1)
         end)
-        game:GetService("Players").LocalPlayer.CharacterAdded:Wait()
+        player.CharacterAdded:Wait()
     end
 end
 
 -- Fly to target with tween
 function flyToTarget(pos)
-    local character = game:GetService("Players").LocalPlayer.Character
     if not character or not character:FindFirstChild("HumanoidRootPart") then
         warn("Character or HumanoidRootPart not found!")
         return
     end
     local rootPart = character.HumanoidRootPart
+    local humanoid = character.Humanoid
+
+    humanoid.Jump = true
+    task.wait(0.5)
+    humanoid.Jump = false
+
+    local originalSpeed = humanoid.WalkSpeed
+    local originalJump = humanoid.JumpPower
+
+    humanoid.WalkSpeed = 115
+    humanoid.JumpPower = 0
 
     local distance = (pos - rootPart.Position).Magnitude
     local duration = distance / getgenv().Config["FlySpeed"]
 
-    local tweenService = game:GetService("TweenService")
-    if tweenService then
+    if TweenService and TweenService.Create then
         pcall(function()
-            local tween = tweenService:Create(
+            local tween = TweenService:Create(
                 rootPart,
                 TweenInfo.new(duration, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
                 {CFrame = CFrame.new(pos)}
@@ -107,29 +114,13 @@ function flyToTarget(pos)
             tween.Completed:Wait()
         end)
     end
-end
 
--- Simulate click with VirtualInputManager
-local VirtualInputManager = game:GetService("VirtualInputManager")
-function simulateClick(obj)
-    if obj and obj:FindFirstChild("ClickDetector") and VirtualInputManager then
-        local pos = obj.Position
-        print("Attempting to click on:", obj.Name, "at", pos)
-        task.wait(Random.new():NextNumber(getgenv().Config["ClickDelayMin"], getgenv().Config["ClickDelayMax"]))
-        pcall(function()
-            VirtualInputManager:SendMouseButtonEvent(pos.X, pos.Y, 0, true, obj, 1)
-            task.wait(0.1)
-            VirtualInputManager:SendMouseButtonEvent(pos.X, pos.Y, 0, false, obj, 1)
-        end)
-        if not success then warn("Click simulation failed for:", obj.Name) end
-    else
-        warn("ClickDetector or VirtualInputManager not found for:", obj and obj.Name or "nil object")
-    end
+    humanoid.WalkSpeed = originalSpeed
+    humanoid.JumpPower = originalJump
 end
 
 -- Anti-AFK movement
 function antiAfk()
-    local character = game:GetService("Players").LocalPlayer.Character
     if character and character:FindFirstChild("Humanoid") then
         local humanoid = character.Humanoid
         humanoid.Jump = true
@@ -143,7 +134,6 @@ end
 -- Find nearest object
 function findNearest(list)
     local closest, minDist = nil, math.huge
-    local character = game:GetService("Players").LocalPlayer.Character
     if character and character:FindFirstChild("HumanoidRootPart") then
         local rootPart = character.HumanoidRootPart
         for _, obj in pairs(list) do
@@ -157,77 +147,86 @@ function findNearest(list)
     return closest
 end
 
--- Handle tools with mouse click
-game:GetService("UserInputService").InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        local player = game:GetService("Players").LocalPlayer
-        if player and player.Backpack and player.Character and player.Character:FindFirstChild("Humanoid") then
-            for _, tool in pairs(player.Backpack:GetChildren()) do
-                if tool:IsA("Tool") and (tool.Name:lower():find("juice") or tool.Name:lower():find("milk")) then
-                    player.Character.Humanoid:EquipTool(tool)
-                    task.wait(0.2)
-                    if tool:FindFirstChild("ClickDetector") then
-                        simulateClick(tool)
-                        task.wait(0.1)
-                    end
-                end
-            end
-        end
-    end
-end)
-
--- Main loop
+-- Continuous tool equipping and clicking loop
 spawn(function()
     while true do
         ensureAlive()
-
-        local barrels = workspace:FindFirstChild("Barrels")
-        local island8 = workspace:FindFirstChild("Island8")
-        if barrels and barrels:FindFirstChild("Barrels") and barrels:FindFirstChild("Crates") and island8 and island8:FindFirstChild("Kitchen") then
-            if #game:GetService("Players").LocalPlayer.Backpack:GetChildren() > getgenv().Config["MaxTools"] then
-                for _, folder in pairs(island8.Kitchen:GetChildren()) do
-                    local bowl = folder:FindFirstChild("JuicingBowl")
-                    if bowl then
-                        local mixer = bowl:FindFirstChild("Mixer2")
-                        if mixer and mixer:FindFirstChild("ClickDetector") then
-                            local offset = Vector3.new(Random.new():NextNumber(-2, 2), 5, Random.new():NextNumber(-2, 2))
-                            flyToTarget(mixer.Position + offset)
-                            task.wait(Random.new():NextNumber(0.5, 1.5))
-                            simulateClick(mixer)
-                            antiAfk()
-                        end
-                    end
-                end
-            else
-                local targets = {}
-                for _, obj in pairs(barrels.Barrels:GetChildren()) do
-                    if obj:FindFirstChild("ClickDetector") then table.insert(targets, obj) end
-                end
-                for _, obj in pairs(barrels.Crates:GetChildren()) do
-                    if obj:FindFirstChild("ClickDetector") then table.insert(targets, obj) end
-                end
-
-                while #targets > 0 do
-                    ensureAlive()
-                    if #game:GetService("Players").LocalPlayer.Backpack:GetChildren() > getgenv().Config["MaxTools"] then break end
-
-                    local target = findNearest(targets)
-                    if target then
-                        local offset = Vector3.new(Random.new():NextNumber(-2, 2), 5, Random.new():NextNumber(-2, 2))
-                        flyToTarget(target.Position + offset)
-                        task.wait(Random.new():NextNumber(0.1, 0.5))
-                        simulateClick(target)
-                        antiAfk()
-                        for i, obj in pairs(targets) do
-                            if obj == target then table.remove(targets, i) break end
-                        end
+        local player = game:GetService("Players").LocalPlayer
+        local humanoid = player.Character and player.Character:FindFirstChild("Humanoid")
+        local backpack = player:WaitForChild("Backpack")
+        if humanoid and backpack then
+            for _, tool in pairs(backpack:GetChildren()) do
+                if tool:IsA("Tool") and (tool.Name:lower():find("juice") or tool.Name:lower():find("milk")) then
+                    humanoid:EquipTool(tool)
+                    task.wait(0.05) -- Minimal delay for equipping stability
+                    -- Visual mouse click simulation
+                    local virtualInput = game:GetService("VirtualInputManager")
+                    if virtualInput and tool:FindFirstChild("ClickDetector") then
+                        local pos = tool.Position
+                        print("Equipping and clicking:", tool.Name, "at", pos)
+                        pcall(function()
+                            virtualInput:SendMouseButtonEvent(pos.X, pos.Y, 0, true, tool, 1)
+                            task.wait(0.1)
+                            virtualInput:SendMouseButtonEvent(pos.X, pos.Y, 0, false, tool, 1)
+                        end)
                     end
                 end
             end
-        else
-            warn("Required workspace folders not found! Barrels:", barrels, "Island8:", island8)
         end
+        task.wait(0.1) -- Short pause before rechecking backpack
+    end
+end)
 
+-- Continuous visual mouse click simulation on targets
+spawn(function()
+    while true do
+        ensureAlive()
+        local barrels = workspace:FindFirstChild("Barrels")
+        local island8 = workspace:FindFirstChild("Island8")
+        if barrels and barrels:FindFirstChild("Barrels") and barrels:FindFirstChild("Crates") and island8 and island8:FindFirstChild("Kitchen") then
+            local targets = {}
+            for _, obj in pairs(barrels.Barrels:GetChildren()) do
+                if obj:FindFirstChild("ClickDetector") then table.insert(targets, obj) end
+            end
+            for _, obj in pairs(barrels.Crates:GetChildren()) do
+                if obj:FindFirstChild("ClickDetector") then table.insert(targets, obj) end
+            end
+            for _, folder in pairs(island8.Kitchen:GetChildren()) do
+                local bowl = folder:FindFirstChild("JuicingBowl")
+                if bowl then
+                    local mixer = bowl:FindFirstChild("Mixer2")
+                    if mixer and mixer:FindFirstChild("ClickDetector") then
+                        table.insert(targets, mixer)
+                    end
+                end
+            end
+
+            if #targets > 0 then
+                local target = findNearest(targets)
+                if target and target:FindFirstChild("ClickDetector") then
+                    local virtualInput = game:GetService("VirtualInputManager")
+                    if virtualInput then
+                        local pos = target.Position
+                        print("Simulating click on target:", target.Name, "at", pos)
+                        pcall(function()
+                            virtualInput:SendMouseButtonEvent(pos.X, pos.Y, 0, true, target, 1)
+                            task.wait(0.1)
+                            virtualInput:SendMouseButtonEvent(pos.X, pos.Y, 0, false, target, 1)
+                        end)
+                        flyToTarget(pos + Vector3.new(Random.new():NextNumber(-2, 2), 5, Random.new():NextNumber(-2, 2)))
+                        antiAfk()
+                    end
+                end
+            end
+        end
+        task.wait(Random.new():NextNumber(getgenv().Config["ClickDelayMin"], getgenv().Config["ClickDelayMax"]))
+    end
+end)
+
+-- Main loop (optional, can be kept for other logic if needed)
+spawn(function()
+    while true do
+        ensureAlive()
         task.wait(getgenv().Config["LoopDelay"])
     end
 end)
