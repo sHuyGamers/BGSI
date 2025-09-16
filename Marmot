@@ -18,7 +18,7 @@ local function flyToTarget(targetPosition)
     -- Temporarily increase fly speed and disable jumping
     local originalWalkSpeed = humanoid.WalkSpeed
     local originalJumpPower = humanoid.JumpPower
-    humanoid.WalkSpeed = random:NextNumber(50, 80) -- Faster for flying
+    humanoid.WalkSpeed = random:NextNumber(120, 200) -- Faster for flying
     humanoid.JumpPower = 0 -- No jumping
 
     -- Use Tween for smooth flying movement
