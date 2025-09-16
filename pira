@@ -1,205 +1,145 @@
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local player = Players.LocalPlayer
+local backpack = player:WaitForChild("Backpack")
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoid = character:WaitForChild("Humanoid")
+local rootPart = character:WaitForChild("HumanoidRootPart")
+local mouse = player:GetMouse()
+
 local barrelsFolder = workspace:WaitForChild("Barrels"):WaitForChild("Barrels")
 local cratesFolder = workspace:WaitForChild("Barrels"):WaitForChild("Crates")
 local kitchenFolder = workspace:WaitForChild("Island8"):WaitForChild("Kitchen")
-local player = game:GetService("Players").LocalPlayer
-local character = player.Character or player.CharacterAdded:Wait()
-local humanoid = character:WaitForChild("Humanoid")
-local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
-local backpack = player:WaitForChild("Backpack")
+
 local random = Random.new()
-local tweenService = game:GetService("TweenService")
-local userInputService = game:GetService("UserInputService")
 
--- Function to simulate smooth flying movement toward a target with noticeable speed
-local function flyToTarget(targetPosition)
-    local startPosition = humanoidRootPart.Position
-    local distance = (targetPosition - startPosition).Magnitude
-    local flightTime = math.max(0.3, distance / (humanoid.WalkSpeed * random:NextNumber(2.0, 3.0))) -- Minimum 0.3s, adjusted for distance
+-- Respawn if dead
+local function ensureAlive()
+    if not humanoid or humanoid.Health <= 0 then
+        local success, err = pcall(function()
+            ReplicatedStorage:WaitForChild("Connections"):WaitForChild("Spawn"):FireServer(1)
+        end)
+        if not success then warn("Respawn failed: " .. err) end
+        character = player.Character or player.CharacterAdded:Wait()
+        humanoid = character:WaitForChild("Humanoid")
+        rootPart = character:WaitForChild("HumanoidRootPart")
+    end
+end
 
-    -- Temporarily increase fly speed and disable jumping
-    local originalWalkSpeed = humanoid.WalkSpeed
-    local originalJumpPower = humanoid.JumpPower
-    humanoid.WalkSpeed = random:NextNumber(100, 110) -- Reduced for visible flight
-    humanoid.JumpPower = 0 -- No jumping
+-- Fly to target with tween
+local function flyToTarget(pos)
+    local distance = (pos - rootPart.Position).Magnitude
+    local duration = math.max(0.3, distance / (humanoid.WalkSpeed * random:NextNumber(2.0, 3.0)))
 
-    -- Use Tween for smooth flying movement with noticeable easing
-    local tweenInfo = TweenInfo.new(flightTime, Enum.EasingStyle.Quad, Enum.EasingDirection.Out) -- Quad Out for smoother acceleration
-    local tween = tweenService:Create(humanoidRootPart, tweenInfo, {CFrame = CFrame.new(targetPosition)})
+    local originalSpeed = humanoid.WalkSpeed
+    local originalJump = humanoid.JumpPower
+
+    humanoid.WalkSpeed = random:NextNumber(100, 110)
+    humanoid.JumpPower = 0
+
+    local tween = TweenService:Create(rootPart, TweenInfo.new(duration, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {CFrame = CFrame.new(pos)})
     tween:Play()
     tween.Completed:Wait()
 
-    -- Revert properties
-    humanoid.WalkSpeed = originalWalkSpeed
-    humanoid.JumpPower = originalJumpPower
+    humanoid.WalkSpeed = originalSpeed
+    humanoid.JumpPower = originalJump
 end
 
--- Function to simulate a single click with human-like delay
-local function simulateClick(target)
-    if target and target:FindFirstChild("ClickDetector") then
-        wait(random:NextNumber(0.2, 0.5)) -- Random delay before click
-        fireclickdetector(target.ClickDetector) -- Use fireclickdetector directly
+-- Click with delay
+local function simulateClick(obj)
+    if obj and obj:FindFirstChild("ClickDetector") then
+        task.wait(random:NextNumber(0.2, 0.5))
+        fireclickdetector(obj.ClickDetector)
     end
 end
 
--- Function to find the nearest target from a list
-local function findNearestTargetFromList(targetList)
-    local nearest = nil
-    local minDistance = math.huge
-    local currentPosition = humanoidRootPart.Position
+-- Anti-AFK movement
+local function antiAfk()
+    humanoid.Jump = true
+    task.wait(0.1)
+    humanoid.Jump = false
+    humanoid:Move(Vector3.new(random:NextNumber(-5, 5), 0, random:NextNumber(-5, 5)), true)
+    task.wait(0.2)
+end
 
-    for _, object in pairs(targetList) do
-        local distance = (object.Position - currentPosition).Magnitude
-        if distance < minDistance then
-            minDistance = distance
-            nearest = object
+-- Find nearest object
+local function findNearest(list)
+    local closest, minDist = nil, math.huge
+    for _, obj in pairs(list) do
+        local dist = (obj.Position - rootPart.Position).Magnitude
+        if dist < minDist then
+            minDist = dist
+            closest = obj
         end
     end
-
-    return nearest
+    return closest
 end
 
--- Function to simulate anti-afk activity
-local function performAntiAfk()
-    -- Simulate a jump or small movement
-    humanoid.Jump = true
-    wait(0.1) -- Brief jump
-    humanoid.Jump = false
-    humanoid:Move(Vector3.new(random:NextNumber(-5, 5), 0, random:NextNumber(-5, 5)), true) -- Small random movement
-    wait(0.2) -- Allow movement to register
-end
-
--- Function to handle tool equipping and clicking
-local function handleTools()
-    while wait(math.random(0.5, 2.0)) do
+-- Handle tools when mouse is clicked
+local function handleToolsWithMouse()
+    mouse.Button1Down:Connect(function()
         for _, tool in pairs(backpack:GetChildren()) do
-            if string.find(string.lower(tool.Name), "juice") or string.find(string.lower(tool.Name), "milk") then
+            if tool:IsA("Tool") and (tool.Name:lower():find("juice") or tool.Name:lower():find("milk")) then
                 humanoid:EquipTool(tool)
-                wait(0.2)
-
+                task.wait(0.2)
                 if tool:FindFirstChild("ClickDetector") then
-                    wait(math.random(0.3, 1.0))
-                    userInputService.InputBegan:Wait() -- Wait for any input to trigger (simulates player action)
-                    local mouse = player:GetMouse()
-                    mouse.Button1Down:Connect(function()
-                        fireclickdetector(tool.ClickDetector)
-                    end)
-                    wait(0.1) -- Small delay after click
+                    fireclickdetector(tool.ClickDetector)
+                    task.wait(0.1)
                 end
             end
         end
-    end
-end
-
--- Function to respawn character if dead
-local function respawnIfDead()
-    local success, err = pcall(function()
-        game:GetService("ReplicatedStorage"):WaitForChild("Connections"):WaitForChild("Spawn"):FireServer(unpack({1}))
     end)
-    if not success then
-        warn("Respawn failed: " .. err)
-    end
 end
 
--- Main loop with death detection
+-- Khởi động xử lý chuột ngay từ đầu
+handleToolsWithMouse()
+
+-- Main loop
 while true do
-    -- Start tool handling in a separate coroutine
-    coroutine.wrap(handleTools)()
+    ensureAlive()
 
-    -- Monitor character state
-    local backpackCount = #backpack:GetChildren()
-
-    if backpackCount > 15 then
-        -- Handle Mixer2 in Kitchen folders
+    if #backpack:GetChildren() > 15 then
         for _, folder in pairs(kitchenFolder:GetChildren()) do
-            if folder:FindFirstChild("JuicingBowl") then
-                local mixer2 = folder.JuicingBowl:FindFirstChild("Mixer2")
-                if mixer2 and mixer2:FindFirstChild("ClickDetector") then
-                    local offsetX = random:NextNumber(-2, 2)
-                    local offsetZ = random:NextNumber(-2, 2)
-                    local targetPosition = mixer2.Position + Vector3.new(offsetX, 5, offsetZ)
-                    flyToTarget(targetPosition)
-                    wait(random:NextNumber(0.5, 1.5))
-                    simulateClick(mixer2)
-                    performAntiAfk() -- Anti-afk after each action
+            local bowl = folder:FindFirstChild("JuicingBowl")
+            if bowl then
+                local mixer = bowl:FindFirstChild("Mixer2")
+                if mixer and mixer:FindFirstChild("ClickDetector") then
+                    local offset = Vector3.new(random:NextNumber(-2, 2), 5, random:NextNumber(-2, 2))
+                    flyToTarget(mixer.Position + offset)
+                    task.wait(random:NextNumber(0.5, 1.5))
+                    simulateClick(mixer)
+                    antiAfk()
                 end
             end
         end
     else
-        -- Collect all barrels and crates as targets
         local targets = {}
-        for _, barrel in pairs(barrelsFolder:GetChildren()) do
-            if barrel:FindFirstChild("ClickDetector") then
-                table.insert(targets, barrel)
-            end
+        for _, obj in pairs(barrelsFolder:GetChildren()) do
+            if obj:FindFirstChild("ClickDetector") then table.insert(targets, obj) end
         end
-        for _, crate in pairs(cratesFolder:GetChildren()) do
-            if crate:FindFirstChild("ClickDetector") then
-                table.insert(targets, crate)
-            end
+        for _, obj in pairs(cratesFolder:GetChildren()) do
+            if obj:FindFirstChild("ClickDetector") then table.insert(targets, obj) end
         end
 
-        -- Process all targets by repeatedly selecting the nearest one
         while #targets > 0 do
-            if not humanoid or humanoid.Health <= 0 then
-                respawnIfDead()
-                character = player.Character or player.CharacterAdded:Wait()
-                humanoid = character:WaitForChild("Humanoid")
-                humanoidRootPart = character:WaitForChild("HumanoidRootPart")
-                break
-            end
-
-            local nearestTarget = findNearestTargetFromList(targets)
-            if nearestTarget then
-                local offsetX = random:NextNumber(-2, 2)
-                local offsetZ = random:NextNumber(-2, 2)
-                local targetPosition = nearestTarget.Position + Vector3.new(offsetX, 5, offsetZ)
-                flyToTarget(targetPosition)
-                wait(random:NextNumber(0.1, 0.5))
-                simulateClick(nearestTarget)
-
-                -- Remove the processed target from the list
-                for i, t in pairs(targets) do
-                    if t == nearestTarget then
-                        table.remove(targets, i)
-                        break
-                    end
-                end
-                performAntiAfk() -- Anti-afk after each target
-            end
-
-            if #backpack:GetChildren() > 15 then break end -- Switch to Mixer2 if condition met
-        end
-        
-        -- Handle Mixer2 in Kitchen folders
-        for _, folder in pairs(kitchenFolder:GetChildren()) do
-            if not humanoid or humanoid.Health <= 0 then
-                respawnIfDead()
-                character = player.Character or player.CharacterAdded:Wait()
-                humanoid = character:WaitForChild("Humanoid")
-                humanoidRootPart = character:WaitForChild("HumanoidRootPart")
-                break
-            end
-            if folder:FindFirstChild("JuicingBowl") then
-                local mixer2 = folder.JuicingBowl:FindFirstChild("Mixer2")
-                if mixer2 and mixer2:FindFirstChild("ClickDetector") then
-                    local offsetX = random:NextNumber(-2, 2)
-                    local offsetZ = random:NextNumber(-2, 2)
-                    local targetPosition = mixer2.Position + Vector3.new(offsetX, 5, offsetZ)
-                    flyToTarget(targetPosition)
-                    wait(random:NextNumber(0.5, 1.5))
-                    simulateClick(mixer2)
-                    performAntiAfk() -- Anti-afk after each action
+            ensureAlive()
+            local target = findNearest(targets)
+            if target then
+                local offset = Vector3.new(random:NextNumber(-2, 2), 5, random:NextNumber(-2, 2))
+                flyToTarget(target.Position + offset)
+                task.wait(random:NextNumber(0.1, 0.5))
+                simulateClick(target)
+                antiAfk()
+                for i, obj in pairs(targets) do
+                    if obj == target then table.remove(targets, i) break end
                 end
             end
+            if #backpack:GetChildren() > 15 then break end
         end
     end
-    
-    if not humanoid or humanoid.Health <= 0 then
-        respawnIfDead()
-        character = player.Character or player.CharacterAdded:Wait()
-        humanoid = character:WaitForChild("Humanoid")
-        humanoidRootPart = character:WaitForChild("HumanoidRootPart")
-    end
 
-    wait(10) -- Wait 10 seconds before repeating the cycle
+    task.wait(10)
 end
