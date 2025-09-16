@@ -1,6 +1,6 @@
-local barrelsFolder = workspace.Barrels.Barrels
-local cratesFolder = workspace.Barrels.Crates
-local kitchenFolder = workspace.Island8.Kitchen
+local barrelsFolder = workspace:WaitForChild("Barrels"):WaitForChild("Barrels")
+local cratesFolder = workspace:WaitForChild("Barrels"):WaitForChild("Crates")
+local kitchenFolder = workspace:WaitForChild("Island8"):WaitForChild("Kitchen")
 local player = game:GetService("Players").LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
 local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
@@ -8,8 +8,10 @@ local backpack = player:WaitForChild("Backpack")
 local random = Random.new()
 
 while true do
-    -- Check Backpack for more than 30 tools
-    if #backpack:GetChildren() > 15 then
+    -- Continuously check Backpack count during processing
+    local backpackCount = #backpack:GetChildren()
+
+    if backpackCount > 15 then
         -- Handle Mixer2 in Kitchen folders
         for _, folder in pairs(kitchenFolder:GetChildren()) do
             if folder:FindFirstChild("JuicingBowl") then
@@ -24,7 +26,7 @@ while true do
             end
         end
     else
-        -- Handle Barrels
+        -- Handle Barrels with continuous Backpack check
         for _, barrel in pairs(barrelsFolder:GetChildren()) do
             if barrel:FindFirstChild("ClickDetector") then
                 local offsetX = random:NextNumber(-2, 2)
@@ -32,10 +34,11 @@ while true do
                 humanoidRootPart.CFrame = CFrame.new(barrel.Position + Vector3.new(offsetX, 5, offsetZ))
                 wait(random:NextNumber(0.1, 0.5))
                 fireclickdetector(barrel.ClickDetector)
+                if #backpack:GetChildren() > 15 then break end -- Switch to Mixer2 if condition met
             end
         end
         
-        -- Handle Crates
+        -- Handle Crates with continuous Backpack check
         for _, crate in pairs(cratesFolder:GetChildren()) do
             if crate:FindFirstChild("ClickDetector") then
                 local offsetX = random:NextNumber(-2, 2)
@@ -43,6 +46,7 @@ while true do
                 humanoidRootPart.CFrame = CFrame.new(crate.Position + Vector3.new(offsetX, 5, offsetZ))
                 wait(random:NextNumber(0.5, 1.5))
                 fireclickdetector(crate.ClickDetector)
+                if #backpack:GetChildren() > 15 then break end -- Switch to Mixer2 if condition met
             end
         end
         
