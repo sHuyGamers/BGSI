@@ -40,13 +40,18 @@ end
 
 -- Fly to target with tween
 local function flyToTarget(pos)
+    -- Nhảy một cái để thoát khỏi trạng thái ngồi
+    humanoid.Jump = true
+    task.wait(0.1)
+    humanoid.Jump = false
+
     local distance = (pos - rootPart.Position).Magnitude
     local duration = math.max(0.3, distance / (humanoid.WalkSpeed * random:NextNumber(2.0, 3.0)))
 
     local originalSpeed = humanoid.WalkSpeed
     local originalJump = humanoid.JumpPower
 
-    humanoid.WalkSpeed = random:NextNumber(140, 160)
+    humanoid.WalkSpeed = random:NextNumber(100, 110)
     humanoid.JumpPower = 0
 
     local tween = TweenService:Create(rootPart, TweenInfo.new(duration, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {CFrame = CFrame.new(pos)})
@@ -55,8 +60,8 @@ local function flyToTarget(pos)
 
     humanoid.WalkSpeed = originalSpeed
     humanoid.JumpPower = originalJump
-    antiSit()
 end
+
 
 -- Click with delay
 local function simulateClick(obj)
