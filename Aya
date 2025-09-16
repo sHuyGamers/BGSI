@@ -1,224 +1,262 @@
-getgenv().ConfigsKaitun = {
-	Beta_Fix_Data_Sync = true,
-
-	NoDeletePlayer = false,
-
-	["Block Pet Gift"] = true,
-
-	Collect_Cooldown = 120, -- cooldown to collect fruit
-
-	["Low Cpu"] = true,
-	["Auto Rejoin"] = true,
-
-	["Rejoin When Update"] = false,
-	["Limit Tree"] = {
-		["Limit"] = 200,
-		["Destroy Until"] = 180,
-
-		["Safe Tree"] = {
-			"Moon Blossom",
-			"Fossilight",
-		}
-	},
-
-	Seed = {
-		Buy = {
-			Mode = "Auto", -- Custom , Auto
-			Custom = { -- any fruit u need to place
-				"Carrot",
-			}
-		},
-		Place = {
-			Mode = "Lock", -- Select , Lock
-			Select = {
-				"Carrot"
-			},
-			Lock = {
-				"Maple Apple",
-				"Sunflower",
-				"Dragon Pepper",
-				"Elephant Ears",
-				"Moon Melon",
-				"Easter Egg",
-				"Moon Mango",
-				"Bone Blossom",
-				"Fossilight",
-			}
-		}
-	},
-
-	["Seed Pack"] = {
-		Locked = {
-
-		}
-	},
-
-	Events = {
-		["Bean Event"] = {
-			Minimum_Money = 10_000_000, -- minimum money to start play this event
-		},
-		MaxMoney_Restocks = 10_000_000,
-		Shop = { -- un comment to buy
-			"Sprout Seed Pack",
-			"Sprout Egg",
-			-- "Mandrake",
-			"Silver Fertilizer",
-			-- "Canary Melon",
-			-- "Amberheart",
-			"Spriggan",
-		},
-		["Traveling Shop"] = {
-			"Bee Egg",
-		},
-		Craft = {
-			"Anti Bee Egg",
-		},
-		Start_Do_Honey = 2_000_000 -- start trade fruit for honey at money
-	},
-
-	Gear = {
-		Buy = { 
-			"Master Sprinkler",
-			"Godly Sprinkler",
-			"Advanced Sprinkler",
-			"Basic Sprinkler",
-			"Lightning Rod",
-			"Level Up Lollipop",
-			"Medium Treat",
-			"Medium Toy",
-		},
-		Lock = {
-			"Master Sprinkler",
-			"Godly Sprinkler",
-			"Advanced Sprinkler",
-			"Basic Sprinkler",
-			"Lightning Rod",
-		},
-	},
-
-	Eggs = {
-		Place = {
-			"Sprout Egg",
-			"Gourmet Egg",
-			"Zen Egg",
-			"Primal Egg",
-			"Dinosaur Egg",
-			"Oasis Egg",
-			"Anti Bee Egg",
-			"Night Egg",
-			"Bug Egg",
-			"Paradise Egg",
-			"Bee Egg",
-			"Rare Summer Egg",
-			"Mythical Egg",
-			"Common Egg",
-		},
-		Buy = {
-			"Bee Egg",
-			"Oasis Egg",
-			"Paradise Egg",
-			"Anti Bee Egg",
-			"Night Egg",
-			"Rare Summer Egg",
-			"Bug Egg",
-			"Mythical Egg",
-			"Common Egg",
-		}
-	},
-
-	Pets = {
-		["Start Delete Pet At"] = 40,
-		["Upgrade Slot"] = {
-			["Pet"] = {
-				["Starfish"] = { 5, 100, 1, true }, -- the "true" on the last is auto equip (use for like only need to use for upgrade pet)
-			},
-			["Limit Upgrade"] = 2, -- max is 5 (more than or lower than 1 will do nothing)
-			["Equip When Done"] = {
-				["Tanchozuru"] = { 5, 100, 1 }, -- 5 on the first mean equip only 5 | pet , 100 mean equip only level pet lower than 100 | the one on the last is priority it will ues first if possible 
-				["Ostrich"] = { 3, 100, 2 },
-				["Blood Kiwi"] = { 8, 100 },
-				["Seal"] = { 8, 100 },
-				["Rooster"] = { 8, 100 },
-				["Starfish"] = { 5, 75 },
-			},
-		},
-		Unfavorite_AllPet = false,
-		Favorite_LockedPet = true,
-		Locked_Pet_Age = 60, -- pet that age > 60 will lock
-		Locked = {
-			"Golden Goose",
-			"Golem",
-			"French Fry Ferret",
-			"Spaghetti Sloth",
-			"Corrupted Kitsune",
-			"Raiju",
-			"Koi",
-			"Tanuki",
-			"Tanchozuru",
-			"Kappa",
-			"Kitsune",
-			"Dilophosaurus",
-			"Moon Cat",
-			"Capybara",
-			"Spinosaurus",
-			"Bear Bee",
-			"T-Rex",
-			"Brontosaurus",
-			"Disco Bee",
-			"Butterfly",
-			"Queen Bee",
-			"Dragonfly",
-			"Raccoon",
-			"Fennec Fox",
-			"Mimic Octopus",
-			"Red Fox",
-			"Blood Owl",
-			["Starfish"] = 10,
-		},
-		LockPet_Weight = 7, -- if Weight >= 10 they will locked
-		Ignore_Pet_Weight = {
-			"NAME oF PET THAT U DONT NEED LOCK",
-		},
-		Instant_Sell = {
-			"NAME oF SOMETHING",
-		}
-	},
-
-	Webhook = {
-		UrlPet = "https://discord.com/api/webhooks/1396708297091973304/7D9Wa0TEsz-hIeoG6_vnRgUe07XTLUhIT3q-sLHF3IpgKIh70jUypFV4IR6fLimtM4nu",
-		UrlSeed = "xxx",
-		PcName = "xxx",
-
-		Mention = "601249077975580673", -- discord id
-
-		Noti = {
-			Seeds = {
-				"Sunflower",
-				"Dragon Pepper",
-				"Elephant Ears",
-			},
-			SeedPack = {
-				"Idk"
-			},
-			Pets = {
-				"Golden Goose",
-				"French Fry Ferret",
-				"Corrupted Kitsune",
-				"Kitsune",
-				"Spinosaurus",
-				"T-Rex",
-				"Disco Bee",
-				"Butterfly",
-				"Mimic Octopus",
-				"Queen Bee",
-				"Fennec Fox",
-				"Dragonfly",
-				"Raccoon",
-				"Red Fox",
-			},
-			Pet_Weight_Noti = true,
-		}
-	},
+getgenv().Config = {
+    ["MaxTools"] = 20, -- Maximum tools before processing
+    ["FlySpeed"] = 300, -- Speed for flying to targets
+    ["ClickDelayMin"] = 0.2, -- Minimum click delay
+    ["ClickDelayMax"] = 0.5, -- Maximum click delay
+    ["AntiAfkInterval"] = 0.5, -- Interval for anti-AFK movements
+    ["LoopDelay"] = 2 -- Delay for main loop
 }
-License = "GaRIrn87BVCa70rMAc8eloHPlqJdQLD3"
-loadstring(game:HttpGet('https://raw.githubusercontent.com/Real-Aya/Loader/main/Init.lua'))()
+
+-- Wait for game to load and key components
+repeat
+    wait()
+until game:IsLoaded()
+repeat
+    wait()
+until game:GetService("Players").LocalPlayer and game:GetService("Players").LocalPlayer.PlayerGui and
+      game:GetService("Players").LocalPlayer.Backpack and workspace
+
+-- Services
+game:GetService("Players").LocalPlayer.Idled:Connect(function()
+    local virtualUser = game:GetService("VirtualUser")
+    if virtualUser then
+        pcall(function()
+            virtualUser:CaptureController()
+            virtualUser:ClickButton2(Vector2.new())
+        end)
+    end
+end)
+
+-- Create UI for tool count
+if not game:GetService("Players").LocalPlayer.PlayerGui:FindFirstChild("ToolCounterGui") then
+    local gui = Instance.new("ScreenGui")
+    gui.Name = "ToolCounterGui"
+    gui.ResetOnSpawn = false
+    gui.Parent = game:GetService("Players").LocalPlayer.PlayerGui
+
+    local label = Instance.new("TextLabel")
+    label.Size = UDim2.new(0, 200, 0, 50)
+    label.Position = UDim2.new(0.5, -100, 0.05, 0)
+    label.BackgroundTransparency = 1
+    label.TextScaled = true
+    label.Font = Enum.Font.GothamBold
+    label.TextColor3 = Color3.new(1, 1, 1)
+    label.TextStrokeTransparency = 0.5
+    label.Text = "Tools: 0"
+    label.Parent = gui
+end
+
+-- Update tool count UI
+spawn(function()
+    while true do
+        local player = game:GetService("Players").LocalPlayer
+        if player and player.Backpack then
+            local count = 0
+            for _, item in pairs(player.Backpack:GetChildren()) do
+                if item:IsA("Tool") then
+                    count += 1
+                end
+            end
+            local gui = player.PlayerGui:FindFirstChild("ToolCounterGui")
+            if gui and gui:FindFirstChild("TextLabel") then
+                gui.TextLabel.Text = "Tools: " .. count
+                gui.TextLabel.TextColor3 = count > 70 and Color3.fromRGB(255, 100, 100) or Color3.new(1, 1, 1)
+            end
+        end
+        task.wait(0.5)
+    end
+end)
+
+-- Function to check if player is alive
+function isAlive()
+    local player = game:GetService("Players").LocalPlayer
+    return player.Character and player.Character:FindFirstChild("Humanoid") and player.Character.Humanoid.Health > 0
+end
+
+-- Respawn if dead
+function ensureAlive()
+    if not isAlive() then
+        pcall(function()
+            game:GetService("ReplicatedStorage"):WaitForChild("Connections"):WaitForChild("Spawn"):FireServer(1)
+        end)
+        game:GetService("Players").LocalPlayer.CharacterAdded:Wait()
+    end
+end
+
+-- Fly to target with tween
+function flyToTarget(pos)
+    local character = game:GetService("Players").LocalPlayer.Character
+    if not character or not character:FindFirstChild("HumanoidRootPart") then
+        warn("Character or HumanoidRootPart not found!")
+        return
+    end
+    local rootPart = character.HumanoidRootPart
+    local humanoid = character:FindFirstChild("Humanoid")
+
+    humanoid.Jump = true
+    task.wait(0.5)
+    humanoid.Jump = false
+
+    local originalSpeed = humanoid.WalkSpeed
+    local originalJump = humanoid.JumpPower
+
+    humanoid.WalkSpeed = 115
+    humanoid.JumpPower = 0
+
+    local distance = (pos - rootPart.Position).Magnitude
+    local duration = distance / getgenv().Config["FlySpeed"]
+
+    local tweenService = game:GetService("TweenService")
+    if tweenService and tweenService.Create then
+        pcall(function()
+            local tween = tweenService:Create(
+                rootPart,
+                TweenInfo.new(duration, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+                {CFrame = CFrame.new(pos)}
+            )
+            tween:Play()
+            tween.Completed:Wait()
+        end)
+    end
+
+    humanoid.WalkSpeed = originalSpeed
+    humanoid.JumpPower = originalJump
+end
+
+-- Simulate click with fireclickdetector as primary method
+function simulateClick(obj)
+    if obj and obj:FindFirstChild("ClickDetector") then
+        print("Attempting to click on:", obj.Name)
+        task.wait(Random.new():NextNumber(getgenv().Config["ClickDelayMin"], getgenv().Config["ClickDelayMax"]))
+        pcall(function()
+            fireclickdetector(obj.ClickDetector)
+        end)
+        if not success then
+            warn("fireclickdetector failed for:", obj.Name, "trying fallback...")
+            local virtualInput = game:GetService("VirtualInputManager")
+            if virtualInput and obj.Position then
+                pcall(function()
+                    virtualInput:SendMouseButtonEvent(obj.Position.X, obj.Position.Y, 0, true, obj, 1)
+                    task.wait(0.1)
+                    virtualInput:SendMouseButtonEvent(obj.Position.X, obj.Position.Y, 0, false, obj, 1)
+                end)
+            else
+                warn("Fallback click failed for:", obj.Name)
+            end
+        end
+    else
+        warn("ClickDetector not found for:", obj and obj.Name or "nil object")
+    end
+end
+
+-- Anti-AFK movement
+function antiAfk()
+    local character = game:GetService("Players").LocalPlayer.Character
+    if character and character:FindFirstChild("Humanoid") then
+        local humanoid = character.Humanoid
+        humanoid.Jump = true
+        task.wait(getgenv().Config["AntiAfkInterval"])
+        humanoid.Jump = false
+        humanoid:Move(Vector3.new(Random.new():NextNumber(-5, 5), 0, Random.new():NextNumber(-5, 5)), true)
+        task.wait(getgenv().Config["AntiAfkInterval"])
+    end
+end
+
+-- Find nearest object
+function findNearest(list)
+    local closest, minDist = nil, math.huge
+    local character = game:GetService("Players").LocalPlayer.Character
+    if character and character:FindFirstChild("HumanoidRootPart") then
+        local rootPart = character.HumanoidRootPart
+        for _, obj in pairs(list) do
+            local dist = (obj.Position - rootPart.Position).Magnitude
+            if dist < minDist then
+                minDist = dist
+                closest = obj
+            end
+        end
+    end
+    return closest
+end
+
+-- Equip tools sequentially
+function equipTools()
+    local player = game:GetService("Players").LocalPlayer
+    if player and player.Backpack and player.Character and player.Character:FindFirstChild("Humanoid") then
+        local humanoid = player.Character.Humanoid
+        local toolsEquipped = 0
+        for _, tool in pairs(player.Backpack:GetChildren()) do
+            if tool:IsA("Tool") and (tool.Name:lower():find("juice") or tool.Name:lower():find("milk")) then
+                humanoid:EquipTool(tool)
+                toolsEquipped += 1
+                task.wait(0.1) -- Minimal delay to ensure equipping completes
+                if toolsEquipped >= #player.Backpack:GetChildren() then break end -- Stop if all tools are processed
+            end
+        end
+    end
+end
+
+-- Handle tools with mouse click
+game:GetService("UserInputService").InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        equipTools()
+    end
+end)
+
+-- Main loop
+spawn(function()
+    while true do
+        ensureAlive()
+
+        local barrels = workspace:FindFirstChild("Barrels")
+        local island8 = workspace:FindFirstChild("Island8")
+        if barrels and barrels:FindFirstChild("Barrels") and barrels:FindFirstChild("Crates") and island8 and island8:FindFirstChild("Kitchen") then
+            if #game:GetService("Players").LocalPlayer.Backpack:GetChildren() > getgenv().Config["MaxTools"] then
+                equipTools() -- Equip all matching tools quickly
+                for _, folder in pairs(island8.Kitchen:GetChildren()) do
+                    local bowl = folder:FindFirstChild("JuicingBowl")
+                    if bowl then
+                        local mixer = bowl:FindFirstChild("Mixer2")
+                        if mixer and mixer:FindFirstChild("ClickDetector") then
+                            local offset = Vector3.new(Random.new():NextNumber(-2, 2), 5, Random.new():NextNumber(-2, 2))
+                            flyToTarget(mixer.Position + offset)
+                            task.wait(Random.new():NextNumber(0.5, 1.5))
+                            simulateClick(mixer)
+                            antiAfk()
+                        end
+                    end
+                end
+            else
+                local targets = {}
+                for _, obj in pairs(barrels.Barrels:GetChildren()) do
+                    if obj:FindFirstChild("ClickDetector") then table.insert(targets, obj) end
+                end
+                for _, obj in pairs(barrels.Crates:GetChildren()) do
+                    if obj:FindFirstChild("ClickDetector") then table.insert(targets, obj) end
+                end
+
+                while #targets > 0 do
+                    ensureAlive()
+                    if #game:GetService("Players").LocalPlayer.Backpack:GetChildren() > getgenv().Config["MaxTools"] then break end
+
+                    local target = findNearest(targets)
+                    if target then
+                        equipTools() -- Equip all matching tools quickly
+                        local offset = Vector3.new(Random.new():NextNumber(-2, 2), 5, Random.new():NextNumber(-2, 2))
+                        flyToTarget(target.Position + offset)
+                        task.wait(Random.new():NextNumber(0.1, 0.5))
+                        simulateClick(target)
+                        antiAfk()
+                        for i, obj in pairs(targets) do
+                            if obj == target then table.remove(targets, i) break end
+                        end
+                    end
+                end
+            end
+        else
+            warn("Required workspace folders not found! Barrels:", barrels, "Island8:", island8)
+        end
+
+        task.wait(getgenv().Config["LoopDelay"])
+    end
+end)
