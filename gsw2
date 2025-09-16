@@ -9,7 +9,7 @@ local random = Random.new()
 
 while true do
     -- Check Backpack for more than 30 tools
-    if #backpack:GetChildren() > 10 then
+    if #backpack:GetChildren() > 15 then
         -- Handle Mixer2 in Kitchen folders
         for _, folder in pairs(kitchenFolder:GetChildren()) do
             if folder:FindFirstChild("JuicingBowl") then
