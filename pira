@@ -35,14 +35,14 @@ local function flyToTarget(pos)
     task.wait(0.1)
     humanoid.Jump = false
 
-    local distance = (pos - rootPart.Position).Magnitude
-    local duration = math.max(0.2, distance / (humanoid.WalkSpeed * random:NextNumber(1.2, 1.6)))
-
     local originalSpeed = humanoid.WalkSpeed
     local originalJump = humanoid.JumpPower
 
-    humanoid.WalkSpeed = random:NextNumber(120, 140)
+    humanoid.WalkSpeed = 130
     humanoid.JumpPower = 0
+
+    local distance = (pos - rootPart.Position).Magnitude
+    local duration = distance / 300 -- bay nhanh hơn
 
     local tween = TweenService:Create(rootPart, TweenInfo.new(duration, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {CFrame = CFrame.new(pos)})
     tween:Play()
@@ -51,6 +51,7 @@ local function flyToTarget(pos)
     humanoid.WalkSpeed = originalSpeed
     humanoid.JumpPower = originalJump
 end
+
 
 -- Click with delay
 local function simulateClick(obj)
