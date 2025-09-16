@@ -29,15 +29,19 @@ local function ensureAlive()
     end
 end
 
--- Fly to target with tween
+-- Fly to target with tween (nhảy trước khi bay + bay nhanh hơn)
 local function flyToTarget(pos)
+    humanoid.Jump = true
+    task.wait(0.1)
+    humanoid.Jump = false
+
     local distance = (pos - rootPart.Position).Magnitude
-    local duration = math.max(0.3, distance / (humanoid.WalkSpeed * random:NextNumber(2.0, 3.0)))
+    local duration = math.max(0.2, distance / (humanoid.WalkSpeed * random:NextNumber(1.2, 1.6)))
 
     local originalSpeed = humanoid.WalkSpeed
     local originalJump = humanoid.JumpPower
 
-    humanoid.WalkSpeed = random:NextNumber(100, 110)
+    humanoid.WalkSpeed = random:NextNumber(120, 140)
     humanoid.JumpPower = 0
 
     local tween = TweenService:Create(rootPart, TweenInfo.new(duration, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {CFrame = CFrame.new(pos)})
