@@ -16,21 +16,6 @@ local kitchenFolder = workspace:WaitForChild("Island8"):WaitForChild("Kitchen")
 
 local random = Random.new()
 
--- Ẩn nhân vật và tên
-local function hidePlayer()
-    humanoid.NameDisplayDistance = 0
-    humanoid.DisplayName = ""
-
-    for _, part in pairs(character:GetDescendants()) do
-        if part:IsA("BasePart") then
-            part.Transparency = 1
-            part.CanCollide = false
-        elseif part:IsA("Decal") then
-            part.Transparency = 1
-        end
-    end
-end
-
 -- Respawn if dead
 local function ensureAlive()
     if not humanoid or humanoid.Health <= 0 then
@@ -41,11 +26,10 @@ local function ensureAlive()
         character = player.Character or player.CharacterAdded:Wait()
         humanoid = character:WaitForChild("Humanoid")
         rootPart = character:WaitForChild("HumanoidRootPart")
-        hidePlayer()
     end
 end
 
--- Di chuyển ẩn dưới đất rồi nhảy lên đích
+-- Fly to target with tween (nhảy trước khi bay + bay nhanh hơn)
 local function flyToTarget(pos)
     humanoid.Jump = true
     task.wait(0.1)
@@ -57,19 +41,12 @@ local function flyToTarget(pos)
     humanoid.WalkSpeed = 130
     humanoid.JumpPower = 0
 
-    local lowPos = Vector3.new(pos.X, pos.Y - 10, pos.Z)
-    local upPos = pos
+    local distance = (pos - rootPart.Position).Magnitude
+    local duration = distance / 300 -- bay nhanh hơn
 
-    local distance = (lowPos - rootPart.Position).Magnitude
-    local duration = distance / 300
-
-    local tweenDown = TweenService:Create(rootPart, TweenInfo.new(duration, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {CFrame = CFrame.new(lowPos)})
-    tweenDown:Play()
-    tweenDown.Completed:Wait()
-
-    local tweenUp = TweenService:Create(rootPart, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {CFrame = CFrame.new(upPos)})
-    tweenUp:Play()
-    tweenUp.Completed:Wait()
+    local tween = TweenService:Create(rootPart, TweenInfo.new(duration, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {CFrame = CFrame.new(pos)})
+    tween:Play()
+    tween.Completed:Wait()
 
     humanoid.WalkSpeed = originalSpeed
     humanoid.JumpPower = originalJump
@@ -123,12 +100,12 @@ end
 
 -- Khởi động xử lý chuột ngay từ đầu
 handleToolsWithMouse()
-hidePlayer()
 
 -- Main loop
 while true do
     ensureAlive()
 
+    -- Nếu backpack đầy thì xử lý Mixer2
     if #backpack:GetChildren() > 15 then
         for _, folder in pairs(kitchenFolder:GetChildren()) do
             local bowl = folder:FindFirstChild("JuicingBowl")
@@ -144,6 +121,7 @@ while true do
             end
         end
     else
+        -- Nếu chưa đầy thì xử lý barrel/crate
         local targets = {}
         for _, obj in pairs(barrelsFolder:GetChildren()) do
             if obj:FindFirstChild("ClickDetector") then table.insert(targets, obj) end
@@ -154,7 +132,9 @@ while true do
 
         while #targets > 0 do
             ensureAlive()
-            if #backpack:GetChildren() > 15 then break end
+            if #backpack:GetChildren() > 15 then
+                break -- ngừng xử lý nếu backpack đã đầy
+            end
 
             local target = findNearest(targets)
             if target then
