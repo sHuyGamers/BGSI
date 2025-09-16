@@ -1,38 +1,133 @@
-setfpscap(5)  -- number = fps
-task.spawn(function()
-    _G.Config = { UserID = "1ee8f1f0-2db3-44ee-9707-5d48960fc770", discord_id = "601249077975580673" , Note = "Pc", } loadstring(game:HttpGet("https://raw.githubusercontent.com/skadidau/unfazedfree/refs/heads/main/bgsi"))()
-end)
+local barrelsFolder = workspace:WaitForChild("Barrels"):WaitForChild("Barrels")
+local cratesFolder = workspace:WaitForChild("Barrels"):WaitForChild("Crates")
+local kitchenFolder = workspace:WaitForChild("Island8"):WaitForChild("Kitchen")
+local player = game:GetService("Players").LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoid = character:WaitForChild("Humanoid")
+local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+local backpack = player:WaitForChild("Backpack")
+local random = Random.new()
+local tweenService = game:GetService("TweenService")
 
-task.spawn(function()
-script_key="dOGaUhwlZLjpwxllFQCuOqEakAkdXuuk";
-getgenv().bgsInfConfig = {
-    ADD_FRIEND = true,
-    AUTO_UPDATE_RESTART = true,
-    PURCHASE_ALIENSHOP = true,
-    PURCHASE_BLACKMARKET = true,
-    PURCHASE_STARSHOP_SLOT = 14,
-    RESTOCK_SHOP = "Blackmarket",
+-- Function to simulate smooth flying movement toward a target
+local function flyToTarget(targetPosition)
+    local startPosition = humanoidRootPart.Position
+    local distance = (targetPosition - startPosition).Magnitude
+    local flightTime = distance / (humanoid.WalkSpeed * random:NextNumber(3.0, 4.0)) -- Faster flight speed
 
-    USE_ROYAL_KEY = true,
-    USE_GOLDEN_KEY = true,
-    USE_DICE_KEY = true,
-    USE_MYSTERY_BOX = true,
+    -- Temporarily increase fly speed and disable jumping
+    local originalWalkSpeed = humanoid.WalkSpeed
+    local originalJumpPower = humanoid.JumpPower
+    humanoid.WalkSpeed = random:NextNumber(50, 80) -- Faster for flying
+    humanoid.JumpPower = 0 -- No jumping
 
-    RARITY_TO_DELETE = {"Common", "Unique", "Rare", "Epic"},
-    LEGENDARY_TIER_TO_DELETE = 1,
+    -- Use Tween for smooth flying movement
+    local tweenInfo = TweenInfo.new(flightTime, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut)
+    local tween = tweenService:Create(humanoidRootPart, tweenInfo, {CFrame = CFrame.new(targetPosition)})
+    tween:Play()
+    tween.Completed:Wait()
 
-    ENCHANT_TEAMUP = true,
-    ENCHANT_TEAMUP_TIER = 1,
+    -- Revert properties
+    humanoid.WalkSpeed = originalWalkSpeed
+    humanoid.JumpPower = originalJumpPower
+end
 
-    RIFT_EGGS = {"Silly Egg", "Nightmare Egg", "Cyber Egg"},
-    HATCH_1X_EGG = "Cyber Egg", 
+-- Function to simulate a single click with human-like delay
+local function simulateClick(target)
+    if target and target:FindFirstChild("ClickDetector") then
+        wait(random:NextNumber(0.2, 0.5)) -- Random delay before click
+        fireclickdetector(target.ClickDetector) -- Use fireclickdetector directly
+    end
+end
 
-    WEBHOOK_URL = "https://discord.com/api/webhooks/1364627427250405466/XTyrdTWJXVZaTeGJBnvP2u8CBeQYUK_EuktXQFhTKdzdYC4mmTUnzmdQv-6nZTvChI3Q",
-    DISCORD_ID = "@Leader",
-    WEBHOOK_ODDS = 5000000,
-    SHOW_PET_WEBHOOK_USERNAME = true,
-}
-loadstring(game:HttpGet("https://api.luarmor.net/files/v3/loaders/3dc52e6a2fc4f671b66757e93f4fd38b.lua"))()
-end)
+-- Function to find the nearest target from a list
+local function findNearestTargetFromList(targetList)
+    local nearest = nil
+    local minDistance = math.huge
+    local currentPosition = humanoidRootPart.Position
 
+    for _, object in pairs(targetList) do
+        local distance = (object.Position - currentPosition).Magnitude
+        if distance < minDistance then
+            minDistance = distance
+            nearest = object
+        end
+    end
 
+    return nearest
+end
+
+while true do
+    -- Continuously check Backpack count during processing
+    local backpackCount = #backpack:GetChildren()
+
+    if backpackCount > 15 then
+        -- Handle Mixer2 in Kitchen folders
+        for _, folder in pairs(kitchenFolder:GetChildren()) do
+            if folder:FindFirstChild("JuicingBowl") then
+                local mixer2 = folder.JuicingBowl:FindFirstChild("Mixer2")
+                if mixer2 and mixer2:FindFirstChild("ClickDetector") then
+                    local offsetX = random:NextNumber(-2, 2)
+                    local offsetZ = random:NextNumber(-2, 2)
+                    local targetPosition = mixer2.Position + Vector3.new(offsetX, 5, offsetZ)
+                    flyToTarget(targetPosition)
+                    wait(random:NextNumber(0.5, 1.5))
+                    simulateClick(mixer2)
+                end
+            end
+        end
+    else
+        -- Collect all barrels and crates as targets
+        local targets = {}
+        for _, barrel in pairs(barrelsFolder:GetChildren()) do
+            if barrel:FindFirstChild("ClickDetector") then
+                table.insert(targets, barrel)
+            end
+        end
+        for _, crate in pairs(cratesFolder:GetChildren()) do
+            if crate:FindFirstChild("ClickDetector") then
+                table.insert(targets, crate)
+            end
+        end
+
+        -- Process all targets by repeatedly selecting the nearest one
+        while #targets > 0 do
+            local nearestTarget = findNearestTargetFromList(targets)
+            if nearestTarget then
+                local offsetX = random:NextNumber(-2, 2)
+                local offsetZ = random:NextNumber(-2, 2)
+                local targetPosition = nearestTarget.Position + Vector3.new(offsetX, 5, offsetZ)
+                flyToTarget(targetPosition)
+                wait(random:NextNumber(0.1, 0.5))
+                simulateClick(nearestTarget)
+
+                -- Remove the processed target from the list
+                for i, t in pairs(targets) do
+                    if t == nearestTarget then
+                        table.remove(targets, i)
+                        break
+                    end
+                end
+            end
+
+            if #backpack:GetChildren() > 15 then break end -- Switch to Mixer2 if condition met
+        end
+        
+        -- Handle Mixer2 in Kitchen folders
+        for _, folder in pairs(kitchenFolder:GetChildren()) do
+            if folder:FindFirstChild("JuicingBowl") then
+                local mixer2 = folder.JuicingBowl:FindFirstChild("Mixer2")
+                if mixer2 and mixer2:FindFirstChild("ClickDetector") then
+                    local offsetX = random:NextNumber(-2, 2)
+                    local offsetZ = random:NextNumber(-2, 2)
+                    local targetPosition = mixer2.Position + Vector3.new(offsetX, 5, offsetZ)
+                    flyToTarget(targetPosition)
+                    wait(random:NextNumber(0.5, 1.5))
+                    simulateClick(mixer2)
+                end
+            end
+        end
+    end
+    
+    wait(10) -- Wait 10 seconds before repeating the cycle
+end
