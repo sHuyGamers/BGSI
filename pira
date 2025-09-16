@@ -1,5 +1,5 @@
 getgenv().Config = {
-    ["MaxTools"] = 15, -- Maximum tools before processing
+    ["MaxTools"] = 20, -- Maximum tools before processing
     ["FlySpeed"] = 300, -- Speed for flying to targets
     ["ClickDelayMin"] = 0.2, -- Minimum click delay
     ["ClickDelayMax"] = 0.5, -- Maximum click delay
@@ -133,7 +133,6 @@ function simulateClick(obj)
         end)
         if not success then
             warn("fireclickdetector failed for:", obj.Name, "trying fallback...")
-            -- Fallback using VirtualInputManager (if available)
             local virtualInput = game:GetService("VirtualInputManager")
             if virtualInput and obj.Position then
                 pcall(function()
@@ -180,23 +179,27 @@ function findNearest(list)
     return closest
 end
 
+-- Equip tools sequentially
+function equipTools()
+    local player = game:GetService("Players").LocalPlayer
+    if player and player.Backpack and player.Character and player.Character:FindFirstChild("Humanoid") then
+        local humanoid = player.Character.Humanoid
+        local toolsEquipped = 0
+        for _, tool in pairs(player.Backpack:GetChildren()) do
+            if tool:IsA("Tool") and (tool.Name:lower():find("juice") or tool.Name:lower():find("milk")) then
+                humanoid:EquipTool(tool)
+                toolsEquipped += 1
+                task.wait(0.1) -- Minimal delay to ensure equipping completes
+                if toolsEquipped >= #player.Backpack:GetChildren() then break end -- Stop if all tools are processed
+            end
+        end
+    end
+end
+
 -- Handle tools with mouse click
 game:GetService("UserInputService").InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        local player = game:GetService("Players").LocalPlayer
-        if player and player.Backpack and player.Character and player.Character:FindFirstChild("Humanoid") then
-            local humanoid = player.Character.Humanoid
-            for _, tool in pairs(player.Backpack:GetChildren()) do
-                if tool:IsA("Tool") and (tool.Name:lower():find("juice") or tool.Name:lower():find("milk")) then
-                    humanoid:EquipTool(tool)
-                    task.wait(0.2)
-                    if tool:FindFirstChild("ClickDetector") then
-                        simulateClick(tool)
-                        task.wait(0.1)
-                    end
-                end
-            end
-        end
+        equipTools()
     end
 end)
 
@@ -209,6 +212,7 @@ spawn(function()
         local island8 = workspace:FindFirstChild("Island8")
         if barrels and barrels:FindFirstChild("Barrels") and barrels:FindFirstChild("Crates") and island8 and island8:FindFirstChild("Kitchen") then
             if #game:GetService("Players").LocalPlayer.Backpack:GetChildren() > getgenv().Config["MaxTools"] then
+                equipTools() -- Equip all matching tools quickly
                 for _, folder in pairs(island8.Kitchen:GetChildren()) do
                     local bowl = folder:FindFirstChild("JuicingBowl")
                     if bowl then
@@ -237,6 +241,7 @@ spawn(function()
 
                     local target = findNearest(targets)
                     if target then
+                        equipTools() -- Equip all matching tools quickly
                         local offset = Vector3.new(Random.new():NextNumber(-2, 2), 5, Random.new():NextNumber(-2, 2))
                         flyToTarget(target.Position + offset)
                         task.wait(Random.new():NextNumber(0.1, 0.5))
