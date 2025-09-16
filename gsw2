@@ -46,7 +46,7 @@ local function flyToTarget(pos)
     local originalSpeed = humanoid.WalkSpeed
     local originalJump = humanoid.JumpPower
 
-    humanoid.WalkSpeed = random:NextNumber(100, 110)
+    humanoid.WalkSpeed = random:NextNumber(140, 160)
     humanoid.JumpPower = 0
 
     local tween = TweenService:Create(rootPart, TweenInfo.new(duration, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {CFrame = CFrame.new(pos)})
