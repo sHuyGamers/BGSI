@@ -1,37 +1,36 @@
-local barrelsFolder = workspace:WaitForChild("Barrels"):WaitForChild("Barrels")
-local cratesFolder = workspace:WaitForChild("Barrels"):WaitForChild("Crates")
-local kitchenFolder = workspace:WaitForChild("Island8"):WaitForChild("Kitchen")
+local barrelsFolder = workspace.Barrels.Barrels
+local cratesFolder = workspace.Barrels.Crates
+local kitchenFolder = workspace.Island8.Kitchen
 local player = game:GetService("Players").LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
-local humanoid = character:WaitForChild("Humanoid")
 local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
 local backpack = player:WaitForChild("Backpack")
-local userInputService = game:GetService("UserInputService")
 local random = Random.new()
-local mouse = player:GetMouse()
-
--- Function to simulate clicking with a timeout
-local function simulateClick(target, maxClicks)
-    local clickCount = 0
-    while target and target:FindFirstChild("ClickDetector") and clickCount < maxClicks do
-        wait(random:NextNumber(0.1, 0.3))
-        mouse.Button1Down:FireServer(target.ClickDetector) -- Attempt server-side click
-        fireclickdetector(target.ClickDetector) -- Fallback client-side click
-        clickCount = clickCount + 1
-    end
-end
-
--- Debug print function
-local function debugPrint(message)
-    print("DEBUG: " .. message)
-end
+local humanoid = character:WaitForChild("Humanoid")
 
 while true do
-    debugPrint("Starting cycle, Backpack count: " .. #backpack:GetChildren())
-    
-    -- Check Backpack for more than 10 tools
-    if #backpack:GetChildren() > 10 then
-        debugPrint("Backpack > 10, processing Mixer2")
+    for _, tool in pairs(backpack:GetChildren()) do
+        if string.find(string.lower(tool.Name), "juice") or string.find(string.lower(tool.Name), "milk") then
+            humanoid:EquipTool(tool)
+            wait(0.2)
+            
+            -- Example: Assume ClickDetector is on a target part (replace with actual path)
+            local targetPart = workspace:WaitForChild("Targets"):WaitForChild("JuiceTarget") -- Adjust this path
+            if targetPart and targetPart:FindFirstChild("ClickDetector") then
+                humanoidRootPart.CFrame = CFrame.new(targetPart.Position + Vector3.new(0, 5, 0))
+                wait(math.random(0.3, 1.0))
+                fireclickdetector(targetPart.ClickDetector)
+            end
+        end
+    end
+    wait(math.random(0.5, 2.0))
+end
+
+
+while true do
+    -- Check Backpack for more than 30 tools
+    if #backpack:GetChildren() > 30 then
+        -- Handle Mixer2 in Kitchen folders
         for _, folder in pairs(kitchenFolder:GetChildren()) do
             if folder:FindFirstChild("JuicingBowl") then
                 local mixer2 = folder.JuicingBowl:FindFirstChild("Mixer2")
@@ -40,40 +39,34 @@ while true do
                     local offsetZ = random:NextNumber(-2, 2)
                     humanoidRootPart.CFrame = CFrame.new(mixer2.Position + Vector3.new(offsetX, 5, offsetZ))
                     wait(random:NextNumber(0.5, 1.5))
-                    simulateClick(mixer2, 5) -- Limit to 5 clicks
-                    debugPrint("Clicked Mixer2 at " .. tostring(mixer2.Position))
+                    fireclickdetector(mixer2.ClickDetector)
                 end
             end
         end
     else
         -- Handle Barrels
-        debugPrint("Processing Barrels")
         for _, barrel in pairs(barrelsFolder:GetChildren()) do
             if barrel:FindFirstChild("ClickDetector") then
                 local offsetX = random:NextNumber(-2, 2)
                 local offsetZ = random:NextNumber(-2, 2)
                 humanoidRootPart.CFrame = CFrame.new(barrel.Position + Vector3.new(offsetX, 5, offsetZ))
                 wait(random:NextNumber(0.1, 0.5))
-                simulateClick(barrel, 5) -- Limit to 5 clicks
-                debugPrint("Clicked Barrel at " .. tostring(barrel.Position))
+                fireclickdetector(barrel.ClickDetector)
             end
         end
         
         -- Handle Crates
-        debugPrint("Processing Crates")
         for _, crate in pairs(cratesFolder:GetChildren()) do
             if crate:FindFirstChild("ClickDetector") then
                 local offsetX = random:NextNumber(-2, 2)
                 local offsetZ = random:NextNumber(-2, 2)
                 humanoidRootPart.CFrame = CFrame.new(crate.Position + Vector3.new(offsetX, 5, offsetZ))
                 wait(random:NextNumber(0.5, 1.5))
-                simulateClick(crate, 5) -- Limit to 5 clicks
-                debugPrint("Clicked Crate at " .. tostring(crate.Position))
+                fireclickdetector(crate.ClickDetector)
             end
         end
         
         -- Handle Mixer2 in Kitchen folders
-        debugPrint("Processing Kitchen Mixer2")
         for _, folder in pairs(kitchenFolder:GetChildren()) do
             if folder:FindFirstChild("JuicingBowl") then
                 local mixer2 = folder.JuicingBowl:FindFirstChild("Mixer2")
@@ -82,30 +75,11 @@ while true do
                     local offsetZ = random:NextNumber(-2, 2)
                     humanoidRootPart.CFrame = CFrame.new(mixer2.Position + Vector3.new(offsetX, 5, offsetZ))
                     wait(random:NextNumber(0.5, 1.5))
-                    simulateClick(mixer2, 5) -- Limit to 5 clicks
-                    debugPrint("Clicked Mixer2 at " .. tostring(mixer2.Position))
+                    fireclickdetector(mixer2.ClickDetector)
                 end
             end
         end
     end
-
-    -- Handle tools with "juice" or "milk"
-    debugPrint("Processing Tools")
-    for _, tool in pairs(backpack:GetChildren()) do
-        if string.find(string.lower(tool.Name), "juice") or string.find(string.lower(tool.Name), "milk") then
-            humanoid:EquipTool(tool)
-            wait(0.2)
-            
-            local targetPart = workspace:WaitForChild("Targets"):WaitForChild("JuiceTarget") -- Update this path
-            if targetPart and targetPart:FindFirstChild("ClickDetector") then
-                humanoidRootPart.CFrame = CFrame.new(targetPart.Position + Vector3.new(0, 5, 0))
-                wait(math.random(0.3, 1.0))
-                simulateClick(targetPart, 5) -- Limit to 5 clicks
-                debugPrint("Clicked Target at " .. tostring(targetPart.Position))
-            end
-        end
-    end
-
-    debugPrint("Waiting 10 seconds")
-    wait(10)
+    
+    wait(10) -- Wait 10 seconds before repeating the cycle
 end
