@@ -72,7 +72,7 @@ while true do
     -- Continuously check Backpack count during processing
     local backpackCount = #backpack:GetChildren()
 
-    if backpackCount > 15 then
+    if backpackCount > 50 then
         -- Handle Mixer2 in Kitchen folders
         for _, folder in pairs(kitchenFolder:GetChildren()) do
             if folder:FindFirstChild("JuicingBowl") then
@@ -123,7 +123,7 @@ while true do
                 performAntiAfk() -- Anti-afk after each target
             end
 
-            if #backpack:GetChildren() > 15 then break end -- Switch to Mixer2 if condition met
+            if #backpack:GetChildren() > 50 then break end -- Switch to Mixer2 if condition met
         end
         
         -- Handle Mixer2 in Kitchen folders
