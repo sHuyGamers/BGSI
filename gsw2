@@ -13,7 +13,7 @@ local tweenService = game:GetService("TweenService")
 local function flyToTarget(targetPosition)
     local startPosition = humanoidRootPart.Position
     local distance = (targetPosition - startPosition).Magnitude
-    local flightTime = distance / (humanoid.WalkSpeed * random:NextNumber(3.0, 4.0)) -- Faster flight speed (3x to 4x walk speed)
+    local flightTime = distance / (humanoid.WalkSpeed * random:NextNumber(3.0, 4.0)) -- Faster flight speed
 
     -- Temporarily increase fly speed and disable jumping
     local originalWalkSpeed = humanoid.WalkSpeed
@@ -40,6 +40,25 @@ local function simulateClick(target)
     end
 end
 
+-- Function to find the nearest target from a folder
+local function findNearestTarget(folder)
+    local nearestTarget = nil
+    local minDistance = math.huge
+    local currentPosition = humanoidRootPart.Position
+
+    for _, object in pairs(folder:GetChildren()) do
+        if object:FindFirstChild("ClickDetector") then
+            local distance = (object.Position - currentPosition).Magnitude
+            if distance < minDistance then
+                minDistance = distance
+                nearestTarget = object
+            end
+        end
+    end
+
+    return nearestTarget
+end
+
 while true do
     -- Continuously check Backpack count during processing
     local backpackCount = #backpack:GetChildren()
@@ -60,32 +79,30 @@ while true do
             end
         end
     else
-        -- Handle Barrels with continuous Backpack check
-        for _, barrel in pairs(barrelsFolder:GetChildren()) do
-            if barrel:FindFirstChild("ClickDetector") then
-                local offsetX = random:NextNumber(-2, 2)
-                local offsetZ = random:NextNumber(-2, 2)
-                local targetPosition = barrel.Position + Vector3.new(offsetX, 5, offsetZ)
-                flyToTarget(targetPosition)
-                wait(random:NextNumber(0.1, 0.5))
-                simulateClick(barrel)
-                if #backpack:GetChildren() > 15 then break end -- Switch to Mixer2 if condition met
-            end
+        -- Handle the nearest Barrel
+        local nearestBarrel = findNearestTarget(barrelsFolder)
+        if nearestBarrel and nearestBarrel:FindFirstChild("ClickDetector") then
+            local offsetX = random:NextNumber(-2, 2)
+            local offsetZ = random:NextNumber(-2, 2)
+            local targetPosition = nearestBarrel.Position + Vector3.new(offsetX, 5, offsetZ)
+            flyToTarget(targetPosition)
+            wait(random:NextNumber(0.1, 0.5))
+            simulateClick(nearestBarrel)
+            if #backpack:GetChildren() > 15 then break end -- Switch to Mixer2 if condition met
         end
-        
-        -- Handle Crates with continuous Backpack check
-        for _, crate in pairs(cratesFolder:GetChildren()) do
-            if crate:FindFirstChild("ClickDetector") then
-                local offsetX = random:NextNumber(-2, 2)
-                local offsetZ = random:NextNumber(-2, 2)
-                local targetPosition = crate.Position + Vector3.new(offsetX, 5, offsetZ)
-                flyToTarget(targetPosition)
-                wait(random:NextNumber(0.5, 1.5))
-                simulateClick(crate)
-                if #backpack:GetChildren() > 15 then break end -- Switch to Mixer2 if condition met
-            end
+
+        -- Handle the nearest Crate
+        local nearestCrate = findNearestTarget(cratesFolder)
+        if nearestCrate and nearestCrate:FindFirstChild("ClickDetector") then
+            local offsetX = random:NextNumber(-2, 2)
+            local offsetZ = random:NextNumber(-2, 2)
+            local targetPosition = nearestCrate.Position + Vector3.new(offsetX, 5, offsetZ)
+            flyToTarget(targetPosition)
+            wait(random:NextNumber(0.5, 1.5))
+            simulateClick(nearestCrate)
+            if #backpack:GetChildren() > 15 then break end -- Switch to Mixer2 if condition met
         end
-        
+
         -- Handle Mixer2 in Kitchen folders
         for _, folder in pairs(kitchenFolder:GetChildren()) do
             if folder:FindFirstChild("JuicingBowl") then
@@ -101,6 +118,6 @@ while true do
             end
         end
     end
-    
+
     wait(10) -- Wait 10 seconds before repeating the cycle
 end
