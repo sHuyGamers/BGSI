@@ -16,14 +16,6 @@ local kitchenFolder = workspace:WaitForChild("Island8"):WaitForChild("Kitchen")
 
 local random = Random.new()
 
--- Ngăn nhân vật bị ngồi dính
-local function antiSit()
-    if humanoid.Sit then
-        humanoid.Sit = false
-        task.wait(0.1)
-    end
-end
-
 -- Respawn if dead
 local function ensureAlive()
     if not humanoid or humanoid.Health <= 0 then
@@ -35,24 +27,22 @@ local function ensureAlive()
         humanoid = character:WaitForChild("Humanoid")
         rootPart = character:WaitForChild("HumanoidRootPart")
     end
-    antiSit()
 end
 
--- Fly to target with tween
+-- Fly to target with tween (nhảy trước khi bay + bay nhanh hơn)
 local function flyToTarget(pos)
-    -- Nhảy một cái để thoát khỏi trạng thái ngồi
     humanoid.Jump = true
     task.wait(0.1)
     humanoid.Jump = false
 
-    local distance = (pos - rootPart.Position).Magnitude
-    local duration = math.max(0.3, distance / (humanoid.WalkSpeed * random:NextNumber(2.0, 3.0)))
-
     local originalSpeed = humanoid.WalkSpeed
     local originalJump = humanoid.JumpPower
 
-    humanoid.WalkSpeed = random:NextNumber(100, 110)
+    humanoid.WalkSpeed = 130
     humanoid.JumpPower = 0
+
+    local distance = (pos - rootPart.Position).Magnitude
+    local duration = distance / 300 -- bay nhanh hơn
 
     local tween = TweenService:Create(rootPart, TweenInfo.new(duration, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {CFrame = CFrame.new(pos)})
     tween:Play()
@@ -68,7 +58,6 @@ local function simulateClick(obj)
     if obj and obj:FindFirstChild("ClickDetector") then
         task.wait(random:NextNumber(0.2, 0.5))
         fireclickdetector(obj.ClickDetector)
-        antiSit()
     end
 end
 
@@ -79,7 +68,6 @@ local function antiAfk()
     humanoid.Jump = false
     humanoid:Move(Vector3.new(random:NextNumber(-5, 5), 0, random:NextNumber(-5, 5)), true)
     task.wait(0.2)
-    antiSit()
 end
 
 -- Find nearest object
@@ -105,7 +93,6 @@ local function handleToolsWithMouse()
                 if tool:FindFirstChild("ClickDetector") then
                     fireclickdetector(tool.ClickDetector)
                     task.wait(0.1)
-                    antiSit()
                 end
             end
         end
