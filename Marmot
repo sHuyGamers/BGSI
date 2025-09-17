@@ -8,7 +8,8 @@ getgenv().Config = {
     ["ClickDelayMax"] = 0.5,
     ["AntiAfkInterval"] = 0.5,
     ["LoopDelay"] = 2,
-    ["StoppedVelocityThreshold"] = 1
+    ["StoppedVelocityThreshold"] = 1,
+    ["DropDistance"] = 5 -- khoảng cách đứng cách người chơi khi drop
 }
 
 -- === MANUAL TARGET SETTINGS ===
@@ -93,6 +94,14 @@ local function flyToTarget(pos)
     local tween = TweenService:Create(root, TweenInfo.new(duration, Enum.EasingStyle.Quad), {CFrame = CFrame.new(pos)})
     tween:Play()
     tween.Completed:Wait()
+end
+
+local function jumpOnce()
+    local char = LocalPlayer.Character
+    if char and char:FindFirstChild("Humanoid") then
+        char.Humanoid.Jump = true
+        task.wait(0.2)
+    end
 end
 
 local function antiAfk()
@@ -191,7 +200,9 @@ task.spawn(function()
 
             if recipient and recipient.Character and recipient.Character:FindFirstChild("HumanoidRootPart") then
                 logDropRecipient(recipient)
-                flyToTarget(recipient.Character.HumanoidRootPart.Position + Vector3.new(0,0,2))
+                -- đứng cách xa người chơi 1 khoảng khi drop
+                local offset = Vector3.new(0, 0, getgenv().Config["DropDistance"])
+                flyToTarget(recipient.Character.HumanoidRootPart.Position + offset)
                 task.wait(0.5)
                 dropAllTools()
             else
@@ -232,6 +243,8 @@ task.spawn(function()
                     end
                     if not closest then break end
 
+                    -- nhảy trước khi di chuyển tới barrel/crate
+                    jumpOnce()
                     flyToTarget(closest.Position + Vector3.new(RandomGen:NextNumber(-2,2), 5, RandomGen:NextNumber(-2,2)))
                     task.wait(RandomGen:NextNumber(0.1,0.5))
                     simulateClick(closest)
