@@ -1,4 +1,4 @@
--- Auto collect + drop to stopped players or manual target
+-- Auto collect + drop (real drop) to stopped players or manual target
 -- Supports manual target name via getgenv().UseManualTarget / getgenv().TargetName
 
 getgenv().Config = {
@@ -9,7 +9,7 @@ getgenv().Config = {
     ["AntiAfkInterval"] = 0.5,
     ["LoopDelay"] = 2,
     ["StoppedVelocityThreshold"] = 1,
-    ["DropOffsetRange"] = 3
+    ["DropDistance"] = 7 -- khoảng cách đứng cách người chơi khi drop
 }
 
 -- === MANUAL TARGET SETTINGS ===
@@ -96,6 +96,14 @@ local function flyToTarget(pos)
     tween.Completed:Wait()
 end
 
+local function jumpOnce()
+    local char = LocalPlayer.Character
+    if char and char:FindFirstChild("Humanoid") then
+        char.Humanoid.Jump = true
+        task.wait(0.2)
+    end
+end
+
 local function antiAfk()
     local char = LocalPlayer.Character
     if char and char:FindFirstChild("Humanoid") then
@@ -162,6 +170,16 @@ local function logDropRecipient(player)
     sv.Parent = folder
 end
 
+-- Click simulation
+local function simulateClick(obj)
+    if not obj then return end
+    local delay = math.random() * (getgenv().Config["ClickDelayMax"] - getgenv().Config["ClickDelayMin"]) + getgenv().Config["ClickDelayMin"]
+    task.wait(delay)
+    if obj:FindFirstChild("ClickDetector") then
+        pcall(function() fireclickdetector(obj.ClickDetector) end)
+    end
+end
+
 -- Main Loop
 task.spawn(function()
     local RandomGen = Random.new()
@@ -182,14 +200,64 @@ task.spawn(function()
 
             if recipient and recipient.Character and recipient.Character:FindFirstChild("HumanoidRootPart") then
                 logDropRecipient(recipient)
-                flyToTarget(recipient.Character.HumanoidRootPart.Position + Vector3.new(0,0,2))
+                -- đứng cách xa người chơi 1 khoảng khi drop
+                local offset = Vector3.new(0, 0, getgenv().Config["DropDistance"])
+                flyToTarget(recipient.Character.HumanoidRootPart.Position + offset)
                 task.wait(0.5)
                 dropAllTools()
             else
                 dropAllTools()
             end
         else
-            antiAfk()
+            -- Collect barrels/crates
+            local barrels = workspace:FindFirstChild("Barrels")
+            if barrels then
+                local targets = {}
+                if barrels:FindFirstChild("Barrels") then
+                    for _, obj in pairs(barrels.Barrels:GetChildren()) do
+                        if obj:IsA("BasePart") and obj:FindFirstChild("ClickDetector") then
+                            table.insert(targets, obj)
+                        end
+                    end
+                end
+                if barrels:FindFirstChild("Crates") then
+                    for _, obj in pairs(barrels.Crates:GetChildren()) do
+                        if obj:IsA("BasePart") and obj:FindFirstChild("ClickDetector") then
+                            table.insert(targets, obj)
+                        end
+                    end
+                end
+
+                while #targets > 0 and count < getgenv().Config["MaxTools"] do
+                    ensureAlive()
+                    local char = LocalPlayer.Character
+                    if not char or not char:FindFirstChild("HumanoidRootPart") then break end
+
+                    -- chọn gần nhất
+                    local closest, minDist
+                    for _, obj in pairs(targets) do
+                        local dist = (obj.Position - char.HumanoidRootPart.Position).Magnitude
+                        if not minDist or dist < minDist then
+                            closest, minDist = obj, dist
+                        end
+                    end
+                    if not closest then break end
+
+                    -- nhảy trước khi di chuyển tới barrel/crate
+                    jumpOnce()
+                    flyToTarget(closest.Position + Vector3.new(RandomGen:NextNumber(-2,2), 5, RandomGen:NextNumber(-2,2)))
+                    task.wait(RandomGen:NextNumber(0.1,0.5))
+                    simulateClick(closest)
+                    antiAfk()
+
+                    for i, o in ipairs(targets) do
+                        if o == closest then table.remove(targets, i) break end
+                    end
+
+                    count = 0
+                    for _, t in ipairs(backpack:GetChildren()) do if t:IsA("Tool") then count += 1 end end
+                end
+            end
         end
     end
 end)
