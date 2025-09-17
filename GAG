@@ -1,133 +1,263 @@
-local barrelsFolder = workspace:WaitForChild("Barrels"):WaitForChild("Barrels")
-local cratesFolder = workspace:WaitForChild("Barrels"):WaitForChild("Crates")
-local kitchenFolder = workspace:WaitForChild("Island8"):WaitForChild("Kitchen")
-local player = game:GetService("Players").LocalPlayer
-local character = player.Character or player.CharacterAdded:Wait()
-local humanoid = character:WaitForChild("Humanoid")
-local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
-local backpack = player:WaitForChild("Backpack")
-local random = Random.new()
-local tweenService = game:GetService("TweenService")
+-- Auto collect + drop (real drop) to stopped players or manual target
+-- Supports manual target name via getgenv().UseManualTarget / getgenv().TargetName
 
--- Function to simulate smooth flying movement toward a target
-local function flyToTarget(targetPosition)
-    local startPosition = humanoidRootPart.Position
-    local distance = (targetPosition - startPosition).Magnitude
-    local flightTime = distance / (humanoid.WalkSpeed * random:NextNumber(3.0, 4.0)) -- Faster flight speed
+getgenv().Config = {
+    ["MaxTools"] = 50,
+    ["FlySpeed"] = 1000,
+    ["ClickDelayMin"] = 0.2,
+    ["ClickDelayMax"] = 0.5,
+    ["AntiAfkInterval"] = 0.5,
+    ["LoopDelay"] = 2,
+    ["StoppedVelocityThreshold"] = 1,
+    ["DropDistance"] = 7 -- khoảng cách đứng cách người chơi khi drop
+}
 
-    -- Temporarily increase fly speed and disable jumping
-    local originalWalkSpeed = humanoid.WalkSpeed
-    local originalJumpPower = humanoid.JumpPower
-    humanoid.WalkSpeed = random:NextNumber(120, 200) -- Faster for flying
-    humanoid.JumpPower = 0 -- No jumping
+-- === MANUAL TARGET SETTINGS ===
+getgenv().UseManualTarget = true
+getgenv().TargetName = "YoutubeHuyGamer"
 
-    -- Use Tween for smooth flying movement
-    local tweenInfo = TweenInfo.new(flightTime, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut)
-    local tween = tweenService:Create(humanoidRootPart, tweenInfo, {CFrame = CFrame.new(targetPosition)})
+repeat task.wait() until game:IsLoaded()
+Players = game:GetService("Players")
+LocalPlayer = Players.LocalPlayer
+repeat task.wait() until LocalPlayer and LocalPlayer:FindFirstChild("Backpack") and LocalPlayer:FindFirstChild("PlayerGui")
+
+-- Anti-AFK
+LocalPlayer.Idled:Connect(function()
+    vu = game:GetService("VirtualUser")
+    pcall(function()
+        vu:CaptureController()
+        vu:ClickButton2(Vector2.new())
+    end)
+end)
+
+-- Create DropLog
+if not workspace:FindFirstChild("DropLog") then
+    Instance.new("Folder", workspace).Name = "DropLog"
+end
+
+-- UI Tool Counter
+if not LocalPlayer.PlayerGui:FindFirstChild("ToolCounterGui") then
+    gui = Instance.new("ScreenGui", LocalPlayer.PlayerGui)
+    gui.Name = "ToolCounterGui"
+    gui.ResetOnSpawn = false
+
+    label = Instance.new("TextLabel", gui)
+    label.Name = "CountLabel"
+    label.Size = UDim2.new(0, 220, 0, 50)
+    label.Position = UDim2.new(0.5, -110, 0.05, 0)
+    label.BackgroundTransparency = 1
+    label.TextScaled = true
+    label.Font = Enum.Font.GothamBold
+    label.TextColor3 = Color3.new(1, 1, 1)
+    label.TextStrokeTransparency = 0.5
+    label.Text = "Tools: 0"
+end
+
+-- Update Tool Count
+task.spawn(function()
+    while task.wait(0.5) do
+        if LocalPlayer:FindFirstChild("Backpack") then
+            count = 0
+            for _, t in ipairs(LocalPlayer.Backpack:GetChildren()) do
+                if t:IsA("Tool") then count += 1 end
+            end
+            gui = LocalPlayer.PlayerGui:FindFirstChild("ToolCounterGui")
+            if gui and gui:FindFirstChild("CountLabel") then
+                gui.CountLabel.Text = "Tools: " .. count
+                gui.CountLabel.TextColor3 = (count >= getgenv().Config["MaxTools"])
+                    and Color3.fromRGB(255,100,100) or Color3.new(1,1,1)
+            end
+        end
+    end
+end)
+
+-- Utils
+function isAlive()
+    char = LocalPlayer.Character
+    return char and char:FindFirstChild("Humanoid") and char.Humanoid.Health > 0
+end
+
+function ensureAlive()
+    if not isAlive() then
+        LocalPlayer.CharacterAdded:Wait()
+        task.wait(1)
+    end
+end
+
+function jumpOnce()
+    char = LocalPlayer.Character
+    if char and char:FindFirstChild("Humanoid") then
+        char.Humanoid.Jump = true
+        task.wait(0.2)
+    end
+end
+
+function flyToTarget(pos)
+    char = LocalPlayer.Character
+    if not (char and char:FindFirstChild("HumanoidRootPart")) then return end
+    jumpOnce() -- luôn nhảy mỗi khi bắt đầu di chuyển
+    root = char.HumanoidRootPart
+    dist = (pos - root.Position).Magnitude
+    duration = math.max(0.2, dist / getgenv().Config["FlySpeed"])
+    tween = game:GetService("TweenService"):Create(root, TweenInfo.new(duration, Enum.EasingStyle.Quad), {CFrame = CFrame.new(pos)})
     tween:Play()
     tween.Completed:Wait()
-
-    -- Revert properties
-    humanoid.WalkSpeed = originalWalkSpeed
-    humanoid.JumpPower = originalJumpPower
 end
 
--- Function to simulate a single click with human-like delay
-local function simulateClick(target)
-    if target and target:FindFirstChild("ClickDetector") then
-        wait(random:NextNumber(0.2, 0.5)) -- Random delay before click
-        fireclickdetector(target.ClickDetector) -- Use fireclickdetector directly
+function antiAfk()
+    char = LocalPlayer.Character
+    if char and char:FindFirstChild("Humanoid") then
+        char.Humanoid.Jump = true
+        task.wait(getgenv().Config["AntiAfkInterval"])
+        char.Humanoid.Jump = false
     end
 end
 
--- Function to find the nearest target from a list
-local function findNearestTargetFromList(targetList)
-    local nearest = nil
-    local minDistance = math.huge
-    local currentPosition = humanoidRootPart.Position
-
-    for _, object in pairs(targetList) do
-        local distance = (object.Position - currentPosition).Magnitude
-        if distance < minDistance then
-            minDistance = distance
-            nearest = object
-        end
-    end
-
-    return nearest
-end
-
-while true do
-    -- Continuously check Backpack count during processing
-    local backpackCount = #backpack:GetChildren()
-
-    if backpackCount > 15 then
-        -- Handle Mixer2 in Kitchen folders
-        for _, folder in pairs(kitchenFolder:GetChildren()) do
-            if folder:FindFirstChild("JuicingBowl") then
-                local mixer2 = folder.JuicingBowl:FindFirstChild("Mixer2")
-                if mixer2 and mixer2:FindFirstChild("ClickDetector") then
-                    local offsetX = random:NextNumber(-2, 2)
-                    local offsetZ = random:NextNumber(-2, 2)
-                    local targetPosition = mixer2.Position + Vector3.new(offsetX, 5, offsetZ)
-                    flyToTarget(targetPosition)
-                    wait(random:NextNumber(0.5, 1.5))
-                    simulateClick(mixer2)
+function findNearestStoppedPlayer(range)
+    range = range or 200
+    myChar = LocalPlayer.Character
+    if not (myChar and myChar:FindFirstChild("HumanoidRootPart")) then return end
+    myPos = myChar.HumanoidRootPart.Position
+    best, bestDist = nil, nil
+    for _, pl in ipairs(Players:GetPlayers()) do
+        if pl ~= LocalPlayer and pl.Character and pl.Character:FindFirstChild("HumanoidRootPart") then
+            root, hum = pl.Character.HumanoidRootPart, pl.Character.Humanoid
+            if hum.Health > 0 and root.Velocity.Magnitude <= getgenv().Config["StoppedVelocityThreshold"] then
+                dist = (root.Position - myPos).Magnitude
+                if dist <= range and (not bestDist or dist < bestDist) then
+                    best, bestDist = pl, dist
                 end
             end
         end
-    else
-        -- Collect all barrels and crates as targets
-        local targets = {}
-        for _, barrel in pairs(barrelsFolder:GetChildren()) do
-            if barrel:FindFirstChild("ClickDetector") then
-                table.insert(targets, barrel)
-            end
-        end
-        for _, crate in pairs(cratesFolder:GetChildren()) do
-            if crate:FindFirstChild("ClickDetector") then
-                table.insert(targets, crate)
-            end
-        end
+    end
+    return best
+end
 
-        -- Process all targets by repeatedly selecting the nearest one
-        while #targets > 0 do
-            local nearestTarget = findNearestTargetFromList(targets)
-            if nearestTarget then
-                local offsetX = random:NextNumber(-2, 2)
-                local offsetZ = random:NextNumber(-2, 2)
-                local targetPosition = nearestTarget.Position + Vector3.new(offsetX, 5, offsetZ)
-                flyToTarget(targetPosition)
-                wait(random:NextNumber(0.1, 0.5))
-                simulateClick(nearestTarget)
+function findPlayerByName(name)
+    for _, pl in ipairs(Players:GetPlayers()) do
+        if pl.Name == name then return pl end
+    end
+end
 
-                -- Remove the processed target from the list
-                for i, t in pairs(targets) do
-                    if t == nearestTarget then
-                        table.remove(targets, i)
-                        break
+-- === DROP THẬT ===
+function dropAllTools()
+    backpack = LocalPlayer.Backpack
+    char = LocalPlayer.Character
+    if not (backpack and char and char:FindFirstChild("Humanoid")) then return end
+    humanoid = char.Humanoid
+    vim = game:GetService("VirtualInputManager")
+
+    for _, tool in ipairs(backpack:GetChildren()) do
+        if tool:IsA("Tool") then
+            humanoid:EquipTool(tool)
+            task.wait(0.15)
+            vim:SendKeyEvent(true, Enum.KeyCode.Backspace, false, game)
+            task.wait(0.05)
+            vim:SendKeyEvent(false, Enum.KeyCode.Backspace, false, game)
+            task.wait(0.2)
+        end
+    end
+end
+
+-- Log Drop
+function logDropRecipient(player)
+    folder = workspace:FindFirstChild("DropLog")
+    sv = Instance.new("StringValue")
+    sv.Name = os.time() .. "_" .. (player and player.Name or "Unknown")
+    sv.Value = (player and player.Name or "Unknown") .. " | Pos: " ..
+        tostring(player and player.Character and player.Character:FindFirstChild("HumanoidRootPart") and player.Character.HumanoidRootPart.Position) ..
+        " | Time: " .. os.date("%Y-%m-%d %H:%M:%S")
+    sv.Parent = folder
+end
+
+-- Click simulation
+function simulateClick(obj)
+    if not obj then return end
+    delay = math.random() * (getgenv().Config["ClickDelayMax"] - getgenv().Config["ClickDelayMin"]) + getgenv().Config["ClickDelayMin"]
+    task.wait(delay)
+    if obj:FindFirstChild("ClickDetector") then
+        pcall(function() fireclickdetector(obj.ClickDetector) end)
+    end
+end
+
+-- Main Loop
+task.spawn(function()
+    RandomGen = Random.new()
+    while task.wait(getgenv().Config["LoopDelay"]) do
+        ensureAlive()
+        backpack = LocalPlayer.Backpack
+        count = 0
+        for _, t in ipairs(backpack:GetChildren()) do if t:IsA("Tool") then count += 1 end end
+
+        if count >= getgenv().Config["MaxTools"] then
+            recipient = nil
+            if getgenv().UseManualTarget then
+                recipient = findPlayerByName(getgenv().TargetName)
+            end
+            if not recipient then
+                recipient = findNearestStoppedPlayer(200)
+            end
+
+            if recipient and recipient.Character and recipient.Character:FindFirstChild("HumanoidRootPart") then
+                logDropRecipient(recipient)
+                -- đứng cách xa người chơi 1 khoảng khi drop
+                offset = Vector3.new(0, 0, getgenv().Config["DropDistance"])
+                flyToTarget(recipient.Character.HumanoidRootPart.Position + offset)
+                task.wait(0.5)
+                dropAllTools()
+            else
+                dropAllTools()
+            end
+        else
+            -- Collect barrels/crates
+            barrels = workspace:FindFirstChild("Barrels")
+            if barrels then
+                targets = {}
+                if barrels:FindFirstChild("Barrels") then
+                    for _, obj in pairs(barrels.Barrels:GetChildren()) do
+                        if obj:IsA("BasePart") and obj:FindFirstChild("ClickDetector") then
+                            table.insert(targets, obj)
+                        end
                     end
                 end
-            end
+                if barrels:FindFirstChild("Crates") then
+                    for _, obj in pairs(barrels.Crates:GetChildren()) do
+                        if obj:IsA("BasePart") and obj:FindFirstChild("ClickDetector") then
+                            table.insert(targets, obj)
+                        end
+                    end
+                end
 
-            if #backpack:GetChildren() > 15 then break end -- Switch to Mixer2 if condition met
-        end
-        
-        -- Handle Mixer2 in Kitchen folders
-        for _, folder in pairs(kitchenFolder:GetChildren()) do
-            if folder:FindFirstChild("JuicingBowl") then
-                local mixer2 = folder.JuicingBowl:FindFirstChild("Mixer2")
-                if mixer2 and mixer2:FindFirstChild("ClickDetector") then
-                    local offsetX = random:NextNumber(-2, 2)
-                    local offsetZ = random:NextNumber(-2, 2)
-                    local targetPosition = mixer2.Position + Vector3.new(offsetX, 5, offsetZ)
-                    flyToTarget(targetPosition)
-                    wait(random:NextNumber(0.5, 1.5))
-                    simulateClick(mixer2)
+                while #targets > 0 and count < getgenv().Config["MaxTools"] do
+                    ensureAlive()
+                    char = LocalPlayer.Character
+                    if not char or not char:FindFirstChild("HumanoidRootPart") then break end
+
+                    -- chọn gần nhất
+                    closest, minDist = nil, nil
+                    for _, obj in pairs(targets) do
+                        dist = (obj.Position - char.HumanoidRootPart.Position).Magnitude
+                        if not minDist or dist < minDist then
+                            closest, minDist = obj, dist
+                        end
+                    end
+                    if not closest then break end
+
+                    -- nhảy trước khi di chuyển tới barrel/crate
+                    jumpOnce()
+                    flyToTarget(closest.Position + Vector3.new(RandomGen:NextNumber(-2,2), 5, RandomGen:NextNumber(-2,2)))
+                    task.wait(RandomGen:NextNumber(0.1,0.5))
+                    simulateClick(closest)
+                    antiAfk()
+
+                    for i, o in ipairs(targets) do
+                        if o == closest then table.remove(targets, i) break end
+                    end
+
+                    count = 0
+                    for _, t in ipairs(backpack:GetChildren()) do if t:IsA("Tool") then count += 1 end end
                 end
             end
         end
     end
-    
-    wait(10) -- Wait 10 seconds before repeating the cycle
-end
+end)
