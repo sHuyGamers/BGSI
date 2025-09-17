@@ -88,7 +88,8 @@ local TweenService = game:GetService("TweenService")
 local function flyToTarget(pos)
     local char = LocalPlayer.Character
     if not (char and char:FindFirstChild("HumanoidRootPart")) then return end
-    local root, humanoid = char.HumanoidRootPart, char:FindFirstChild("Humanoid")
+    jumpOnce()
+    local root = char.HumanoidRootPart
     local dist = (pos - root.Position).Magnitude
     local duration = math.max(0.2, dist / getgenv().Config["FlySpeed"])
     local tween = TweenService:Create(root, TweenInfo.new(duration, Enum.EasingStyle.Quad), {CFrame = CFrame.new(pos)})
