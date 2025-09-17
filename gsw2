@@ -2,7 +2,7 @@
 -- Supports manual target name via getgenv().UseManualTarget / getgenv().TargetName
 
 getgenv().Config = {
-    ["MaxTools"] = 20,
+    ["MaxTools"] = 35,
     ["FlySpeed"] = 300,
     ["ClickDelayMin"] = 0.2,
     ["ClickDelayMax"] = 0.5,
