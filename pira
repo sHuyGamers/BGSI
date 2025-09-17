@@ -4,7 +4,7 @@ getgenv().Config = {
     ["ClickDelayMin"] = 0.2, -- Minimum click delay
     ["ClickDelayMax"] = 0.5, -- Maximum click delay
     ["AntiAfkInterval"] = 0.5, -- Interval for anti-AFK movements
-    ["LoopDelay"] = 10 -- Delay for main loop
+    ["LoopDelay"] = 2 -- Delay for main loop
 }
 
 -- Wait for game to load and key components
@@ -179,18 +179,30 @@ function findNearest(list)
     return closest
 end
 
--- Equip tools sequentially
+-- Equip all tools
 function equipTools()
     local player = game:GetService("Players").LocalPlayer
     if player and player.Backpack and player.Character and player.Character:FindFirstChild("Humanoid") then
         local humanoid = player.Character.Humanoid
-        local toolsEquipped = 0
         for _, tool in pairs(player.Backpack:GetChildren()) do
-            if tool:IsA("Tool") and (tool.Name:lower():find("juice") or tool.Name:lower():find("milk")) then
+            if tool:IsA("Tool") then
                 humanoid:EquipTool(tool)
-                toolsEquipped += 1
                 task.wait(0.1) -- Minimal delay to ensure equipping completes
-                if toolsEquipped >= #player.Backpack:GetChildren() then break end -- Stop if all tools are processed
+            end
+        end
+    end
+end
+
+-- Drop all tools except Melee
+function dropTools()
+    local player = game:GetService("Players").LocalPlayer
+    if player and player.Character and player.Character:FindFirstChild("Humanoid") then
+        local humanoid = player.Character.Humanoid
+        for _, tool in pairs(player.Character:GetChildren()) do
+            if tool:IsA("Tool") and not tool.Name:lower():find("melee") then
+                humanoid:UnequipTools()
+                tool.Parent = workspace
+                task.wait(0.1) -- Minimal delay to ensure dropping completes
             end
         end
     end
@@ -212,16 +224,16 @@ spawn(function()
         local island8 = workspace:FindFirstChild("Island8")
         if barrels and barrels:FindFirstChild("Barrels") and barrels:FindFirstChild("Crates") and island8 and island8:FindFirstChild("Kitchen") then
             if #game:GetService("Players").LocalPlayer.Backpack:GetChildren() > getgenv().Config["MaxTools"] then
-                equipTools() -- Equip all matching tools quickly
+                equipTools() -- Equip all tools
                 for _, folder in pairs(island8.Kitchen:GetChildren()) do
                     local bowl = folder:FindFirstChild("JuicingBowl")
                     if bowl then
                         local mixer = bowl:FindFirstChild("Mixer2")
-                        if mixer and mixer:FindFirstChild("ClickDetector") then
+                        if mixer then
                             local offset = Vector3.new(Random.new():NextNumber(-2, 2), 5, Random.new():NextNumber(-2, 2))
                             flyToTarget(mixer.Position + offset)
                             task.wait(Random.new():NextNumber(0.5, 1.5))
-                            simulateClick(mixer)
+                            dropTools() -- Drop all tools except Melee
                             antiAfk()
                         end
                     end
@@ -241,7 +253,7 @@ spawn(function()
 
                     local target = findNearest(targets)
                     if target then
-                        equipTools() -- Equip all matching tools quickly
+                        equipTools() -- Equip all tools
                         local offset = Vector3.new(Random.new():NextNumber(-2, 2), 5, Random.new():NextNumber(-2, 2))
                         flyToTarget(target.Position + offset)
                         task.wait(Random.new():NextNumber(0.1, 0.5))
