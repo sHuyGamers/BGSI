@@ -218,9 +218,12 @@ spawn(function()
                         local mixer = bowl:FindFirstChild("Mixer2")
                         if mixer then
                             flyToTarget(mixer.Position) -- Fly to exact mixer position
-                            task.wait(Random.new():NextNumber(0.5, 1.5))
-                            dropTools() -- Drop all tools except Melee using Delete key
-                            antiAfk()
+                            task.wait(0.5)
+                            while true do -- Continuous dropping loop
+                                dropTools() -- Drop all tools except Melee using Delete key
+                                antiAfk()
+                                task.wait(0.1) -- Small delay to prevent overwhelming the system
+                            end
                         end
                     end
                 end
