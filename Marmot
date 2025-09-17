@@ -1,15 +1,15 @@
--- Auto collect + drop (real drop) to stopped players or manual target
--- Supports manual target name via getgenv().UseManualTarget / getgenv().TargetName
+-- Auto collect + drop (real drop) nhưng nhân vật đứng yên, chỉ click barrel/crate từ xa
+-- Hỗ trợ manual target qua getgenv().UseManualTarget / getgenv().TargetName
 
 getgenv().Config = {
-    ["MaxTools"] = 20,
-    ["FlySpeed"] = 300,
+    ["MaxTools"] = 35,
     ["ClickDelayMin"] = 0.2,
     ["ClickDelayMax"] = 0.5,
     ["AntiAfkInterval"] = 0.5,
     ["LoopDelay"] = 2,
     ["StoppedVelocityThreshold"] = 1,
-    ["DropDistance"] = 5 -- khoảng cách đứng cách người chơi khi drop
+    ["DropDistance"] = 7,   -- khoảng cách đứng cách người chơi khi drop
+    ["ClickRange"] = 1000   -- tầm xa tối đa để click barrel/crate mà không cần đi đến
 }
 
 -- === MANUAL TARGET SETTINGS ===
@@ -84,26 +84,6 @@ local function ensureAlive()
     end
 end
 
-local TweenService = game:GetService("TweenService")
-local function flyToTarget(pos)
-    local char = LocalPlayer.Character
-    if not (char and char:FindFirstChild("HumanoidRootPart")) then return end
-    local root, humanoid = char.HumanoidRootPart, char:FindFirstChild("Humanoid")
-    local dist = (pos - root.Position).Magnitude
-    local duration = math.max(0.2, dist / getgenv().Config["FlySpeed"])
-    local tween = TweenService:Create(root, TweenInfo.new(duration, Enum.EasingStyle.Quad), {CFrame = CFrame.new(pos)})
-    tween:Play()
-    tween.Completed:Wait()
-end
-
-local function jumpOnce()
-    local char = LocalPlayer.Character
-    if char and char:FindFirstChild("Humanoid") then
-        char.Humanoid.Jump = true
-        task.wait(0.2)
-    end
-end
-
 local function antiAfk()
     local char = LocalPlayer.Character
     if char and char:FindFirstChild("Humanoid") then
@@ -118,7 +98,7 @@ local function findNearestStoppedPlayer(range)
     local myChar = LocalPlayer.Character
     if not (myChar and myChar:FindFirstChild("HumanoidRootPart")) then return end
     local myPos = myChar.HumanoidRootPart.Position
-    local best, bestDist
+    local best, bestDist = nil, nil
     for _, pl in ipairs(Players:GetPlayers()) do
         if pl ~= LocalPlayer and pl.Character and pl.Character:FindFirstChild("HumanoidRootPart") then
             local root, hum = pl.Character.HumanoidRootPart, pl.Character.Humanoid
@@ -182,7 +162,6 @@ end
 
 -- Main Loop
 task.spawn(function()
-    local RandomGen = Random.new()
     while task.wait(getgenv().Config["LoopDelay"]) do
         ensureAlive()
         local backpack = LocalPlayer.Backpack
@@ -190,7 +169,7 @@ task.spawn(function()
         for _, t in ipairs(backpack:GetChildren()) do if t:IsA("Tool") then count += 1 end end
 
         if count >= getgenv().Config["MaxTools"] then
-            local recipient
+            local recipient = nil
             if getgenv().UseManualTarget then
                 recipient = findPlayerByName(getgenv().TargetName)
             end
@@ -201,15 +180,12 @@ task.spawn(function()
             if recipient and recipient.Character and recipient.Character:FindFirstChild("HumanoidRootPart") then
                 logDropRecipient(recipient)
                 -- đứng cách xa người chơi 1 khoảng khi drop
-                local offset = Vector3.new(0, 0, getgenv().Config["DropDistance"])
-                flyToTarget(recipient.Character.HumanoidRootPart.Position + offset)
-                task.wait(0.5)
                 dropAllTools()
             else
                 dropAllTools()
             end
         else
-            -- Collect barrels/crates
+            -- Collect barrels/crates từ xa, không di chuyển
             local barrels = workspace:FindFirstChild("Barrels")
             if barrels then
                 local targets = {}
@@ -233,20 +209,16 @@ task.spawn(function()
                     local char = LocalPlayer.Character
                     if not char or not char:FindFirstChild("HumanoidRootPart") then break end
 
-                    -- chọn gần nhất
-                    local closest, minDist
+                    -- chọn gần nhất trong phạm vi cho phép
+                    local closest, minDist = nil, nil
                     for _, obj in pairs(targets) do
                         local dist = (obj.Position - char.HumanoidRootPart.Position).Magnitude
-                        if not minDist or dist < minDist then
+                        if dist <= getgenv().Config["ClickRange"] and (not minDist or dist < minDist) then
                             closest, minDist = obj, dist
                         end
                     end
                     if not closest then break end
 
-                    -- nhảy trước khi di chuyển tới barrel/crate
-                    jumpOnce()
-                    flyToTarget(closest.Position + Vector3.new(RandomGen:NextNumber(-2,2), 5, RandomGen:NextNumber(-2,2)))
-                    task.wait(RandomGen:NextNumber(0.1,0.5))
                     simulateClick(closest)
                     antiAfk()
 
