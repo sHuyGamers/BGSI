@@ -69,6 +69,13 @@ task.spawn(function()
     end
 end)
 
+-- Handle Respawn to specific spawn point
+LocalPlayer.CharacterAdded:Connect(function()
+    task.wait(1) -- Wait for character to fully load
+    local args = {8}
+    game:GetService("ReplicatedStorage"):WaitForChild("Connections"):WaitForChild("Spawn"):FireServer(unpack(args))
+end)
+
 -- Utils
 function isAlive()
     char = LocalPlayer.Character
@@ -85,8 +92,8 @@ end
 function jumpOnce()
     char = LocalPlayer.Character
     if char and char:FindFirstChild("Humanoid") then
-        char.Humanoid.Jump = true
-        task.wait(0.2)
+        char.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+        task.wait(0.3) -- Increased delay for jump to take effect
     end
 end
 
@@ -106,9 +113,8 @@ end
 function antiAfk()
     char = LocalPlayer.Character
     if char and char:FindFirstChild("Humanoid") then
-        char.Humanoid.Jump = true
+        char.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
         task.wait(getgenv().Config["AntiAfkInterval"])
-        char.Humanoid.Jump = false
     end
 end
 
@@ -199,7 +205,6 @@ task.spawn(function()
                 -- đứng cách xa người chơi 1 khoảng khi drop
                 offset = Vector3.new(0, 0, getgenv().Config["DropDistance"])
                 -- Nhảy trước khi di chuyển đến vị trí drop
-                jumpOnce()
                 flyToTarget(recipient.Character.HumanoidRootPart.Position + offset)
                 task.wait(0.5)
                 dropAllTools()
@@ -239,7 +244,6 @@ task.spawn(function()
                     end
                     if not closest then break end
                     -- nhảy trước khi di chuyển tới barrel/crate
-                    jumpOnce()
                     flyToTarget(closest.Position + Vector3.new(RandomGen:NextNumber(-2,2), 5, RandomGen:NextNumber(-2,2)))
                     task.wait(RandomGen:NextNumber(0.1,0.5))
                     simulateClick(closest)
