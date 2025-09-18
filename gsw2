@@ -100,8 +100,6 @@ end
 function flyToTarget(pos)
     char = LocalPlayer.Character
     if not (char and char:FindFirstChild("HumanoidRootPart")) then return end
-    -- Luôn nhảy trước khi bắt đầu di chuyển đến vị trí mới
-    jumpOnce()
     root = char.HumanoidRootPart
     dist = (pos - root.Position).Magnitude
     duration = math.max(0.2, dist / getgenv().Config["FlySpeed"])
