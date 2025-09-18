@@ -87,15 +87,14 @@ end
 function jumpOnce()
     char = LocalPlayer.Character
     if char and char:FindFirstChild("Humanoid") then
-        char.Humanoid.Jump = true
-        task.wait(0.2)
+        char.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+        task.wait(0.1) 
     end
 end
 
 function flyToTarget(pos)
     char = LocalPlayer.Character
     if not (char and char:FindFirstChild("HumanoidRootPart")) then return end
-    jumpOnce() -- luôn nhảy mỗi khi bắt đầu di chuyển
     root = char.HumanoidRootPart
     dist = (pos - root.Position).Magnitude
     duration = math.max(0.2, dist / getgenv().Config["FlySpeed"])
@@ -242,9 +241,6 @@ task.spawn(function()
                         end
                     end
                     if not closest then break end
-
-                    -- nhảy trước khi di chuyển tới barrel/crate
-                    jumpOnce()
                     flyToTarget(closest.Position + Vector3.new(RandomGen:NextNumber(-2,2), 5, RandomGen:NextNumber(-2,2)))
                     task.wait(RandomGen:NextNumber(0.1,0.5))
                     simulateClick(closest)
