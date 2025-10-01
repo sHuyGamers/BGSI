@@ -1,0 +1,105 @@
+-- ================== INIT ==================
+if not game:IsLoaded() then game.Loaded:Wait() end
+local p,c,bp = game.Players.LocalPlayer, nil,nil
+p.CharacterAdded:Connect(function(ch) c=ch; bp=p:WaitForChild("Backpack") end)
+c = p.Character or p.CharacterAdded:Wait(); bp=p:WaitForChild("Backpack")
+local vim,http = game:GetService("VirtualInputManager"),game:GetService("HttpService")
+
+local pos = {
+    Vector3.new(-1317,217,-1298), Vector3.new(-1309,217,-1231),
+    Vector3.new(-1281,217,-1178), Vector3.new(-1226,217,-1214),
+    Vector3.new(-1270,217,-1263), Vector3.new(-1220,217,-1272),
+    Vector3.new(-1214,217,-1330), Vector3.new(-1243,217,-1405)
+}
+
+-- ================== UTILS ==================
+local function has(n,src) for _,t in ipairs(src:GetChildren()) do if t:IsA("Tool") and t.Name:find(n) then return t end end end
+local function equip(n) local t=has(n,bp) if t then c.Humanoid:EquipTool(t) return true end end
+local function countCompass() local n=0 for _,t in ipairs(bp:GetChildren()) do if t:IsA("Tool") and t.Name=="Compass" then n+=1 end end return n end
+
+-- webhook embed custom color
+local function boxColor(n) return n:find("Ultra Rare") and 0x800080 or (n:find("Rare") and 0xFFD700 or 0x00FF00) end
+local function sendWebhook(lst)
+    if not getgenv().Config.SendWebhook then return end
+    local req=(syn and syn.request) or http_request or (fluxus and fluxus.request) or (KRNL and KRNL.request)
+    if not req then return warn("[WEBHOOK] No HTTP request API available") end
+    local embeds={}
+    for _,b in ipairs(lst) do
+        table.insert(embeds,{
+            title="**Dropped Box**",
+            description=b,
+            color=boxColor(b),
+            footer={text="By [Click to Reveal]",icon_url="https://roblox.com"},
+            url="https://roblox.com/users/"..p.UserId.."/profile"
+        })
+    end
+    req({
+        Url=getgenv().Config.WebhookURL,
+        Method="POST",
+        Headers={["Content-Type"]="application/json"},
+        Body=http:JSONEncode({embeds=embeds})
+    })
+    print("[WEBHOOK] Sent to Discord:", table.concat(lst,", "))
+end
+
+-- ================== DROP BOX ==================
+local function drop()
+    if not getgenv().Config.AutoDropBox then return end
+    c.HumanoidRootPart.CFrame=CFrame.new(getgenv().Config.DropPos)
+    task.wait(.2)
+    for _,t in ipairs(c:GetChildren()) do if t:IsA("Tool") then t.Parent=bp end end
+    local lst={}
+    for _,n in ipairs(getgenv().Config.DropList) do
+        local t=has(n,bp)
+        if t then
+            t.Parent=c; task.wait(.1)
+            vim:SendKeyEvent(true,Enum.KeyCode.Backspace,false,game) task.wait(.05)
+            vim:SendKeyEvent(false,Enum.KeyCode.Backspace,false,game) task.wait(.1)
+            print("[DROP]",t.Name) 
+            table.insert(lst,t.Name)
+        end
+    end
+    if #lst>0 then sendWebhook(lst) end
+end
+
+-- ================== TELE FIND ==================
+local function tele()
+    if not has("Compass",c) and not equip("Compass") then return end
+    vim:SendMouseButtonEvent(0,0,0,true,game,0)
+    for _,v in ipairs(pos) do
+        if not has("Compass",c) and not equip("Compass") then break end
+        c.HumanoidRootPart.CFrame=CFrame.new(v)
+        task.wait(getgenv().Config.TeleportDelay)
+    end
+    vim:SendMouseButtonEvent(0,0,0,false,game,0)
+end
+
+-- ================== MAIN LOOP ==================
+task.spawn(function()
+    while task.wait(.5) do
+        if not getgenv().Config.AutoFarmCompass then continue end
+
+        -- Start searching if enough Compass or already holding one
+        if countCompass()>=getgenv().Config.CompassTarget or has("Compass",bp) or has("Compass",c) then
+            tele()
+        end
+
+        -- Always check for Compass dropped in workspace
+        for _,v in ipairs(workspace:GetChildren()) do
+            if v:IsA("Tool") and v.Name=="Compass" and v:FindFirstChild("Handle") then
+                c.HumanoidRootPart.CFrame=v.Handle.CFrame+Vector3.new(0,3,0)
+                print("[PICKUP] Compass collected from ground")
+                task.wait(.5)
+            end
+        end
+
+        -- Drop boxes if found
+        for _,n in ipairs(getgenv().Config.DropList) do
+            if has(n,bp) then 
+                print("[INFO] Box detected in backpack -> Dropping...")
+                drop()
+                break 
+            end
+        end
+    end
+end)
