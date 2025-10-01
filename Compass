@@ -1,3 +1,17 @@
+-- ================== CONFIG ==================
+getgenv().Config = {
+    AutoFarmCompass = true,
+    AutoDropBox = true,
+    SendWebhook = true,
+
+    WebhookURL = "https://discord.com/api/webhooks/1422802161636479067/cT8I6M4dpYeA62KzjXyqVxer-4l-Tl-3xi9drBwlpgF5GxeALwkOyQfzKF5C1jyvCTfX",
+    CompassTarget = 0, -- number of Compass needed before starting search
+
+    DropPos = Vector3.new(-1266,217,-1302),
+    DropList = {"Ultra Rare Box","Rare Box","Common Box"},
+    TeleportDelay = 0.2
+}
+
 -- ================== INIT ==================
 if not game:IsLoaded() then game.Loaded:Wait() end
 local p,c,bp = game.Players.LocalPlayer, nil,nil
@@ -60,6 +74,18 @@ local function drop()
         end
     end
     if #lst>0 then sendWebhook(lst) end
+end
+
+-- ================== TELE FIND ==================
+local function tele()
+    if not has("Compass",c) and not equip("Compass") then return end
+    vim:SendMouseButtonEvent(0,0,0,true,game,0)
+    for _,v in ipairs(pos) do
+        if not has("Compass",c) and not equip("Compass") then break end
+        c.HumanoidRootPart.CFrame=CFrame.new(v)
+        task.wait(getgenv().Config.TeleportDelay)
+    end
+    vim:SendMouseButtonEvent(0,0,0,false,game,0)
 end
 
 -- ================== MAIN LOOP ==================
