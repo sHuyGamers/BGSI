@@ -1,0 +1,237 @@
+-- ================== INIT ==================
+if not game:IsLoaded() then game.Loaded:Wait() end
+local p = game.Players.LocalPlayer
+local vu = game:GetService("VirtualUser")
+local vim = game:GetService("VirtualInputManager")
+local r = game.ReplicatedStorage
+
+-- ================== CHECK LEGEND (early run) ==================
+if getgenv().Config["CheckLegend"] then
+    if not game.Players:FindFirstChild(getgenv().Config["LegendName"]) then
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/sHuyGamers/BGSI/refs/heads/main/svv"))()
+    end
+end
+
+-- ================== ANTI AFK ==================
+if getgenv().Config["AntiAFK"] then
+    p.Idled:Connect(function()
+        vu:Button2Down(Vector2.new(0,0),workspace.CurrentCamera.CFrame)
+        task.wait(1)
+        vu:Button2Up(Vector2.new(0,0),workspace.CurrentCamera.CFrame)
+    end)
+    print("[AUTO] Anti-AFK Loaded ✓")
+end
+
+-- ================== AUTO REWARD + UPGRADE ==================
+task.spawn(function()
+    if not getgenv().Config["AutoReward"] and not getgenv().Config["AutoUpgrade"] then return end
+    repeat task.wait() until workspace:FindFirstChild("UserData") and workspace.UserData:FindFirstChild("User_"..p.UserId)
+    local store = workspace.UserData["User_"..p.UserId]
+    repeat task.wait() until store:FindFirstChild("FullyLoaded") and store.FullyLoaded.Value
+
+    local Daily = store.Data:WaitForChild("DailyRewardN")
+    local Hourly = store.Data:WaitForChild("HourlyRewardN")
+    local function claimDaily()
+        if Daily.Value > 0 then pcall(function() store.ClaimRewardDaily:FireServer("RewardMark") end) end
+    end
+    local function claimHourly()
+        if Hourly.Value > 0 then pcall(function() store.ClaimRewardHourly:FireServer("RewardMark") end) end
+    end
+    local function upgradeCompass()
+        if getgenv().Config["AutoUpgrade"] then
+            pcall(function() r.GlobalReference.SamTokenCapacity:FireServer() end)
+        end
+    end
+    Daily:GetPropertyChangedSignal("Value"):Connect(claimDaily)
+    Hourly:GetPropertyChangedSignal("Value"):Connect(claimHourly)
+    store.Data.CompassTokenLimit:GetPropertyChangedSignal("Value"):Connect(upgradeCompass)
+
+    while task.wait(getgenv().Config["LoopDelay"]) do
+        if getgenv().Config["AutoReward"] then
+            claimDaily(); claimHourly()
+        end
+        upgradeCompass()
+    end
+end)
+
+-- ================== SAM CLAIM + DROP ==================
+task.spawn(function()
+    if not getgenv().Config["SamClaimDrop"] then return end
+    local c = p.Character or p.CharacterAdded:Wait()
+    local bp = p:WaitForChild("Backpack")
+
+    -- auto anchor
+    task.spawn(function()
+        while task.wait() do
+            if c and c:FindFirstChild("HumanoidRootPart") then
+                c.HumanoidRootPart.Anchored = true
+            end
+        end
+    end)
+
+    local function press(k,t) vim:SendKeyEvent(true,k,false,game) task.wait(t or .1) vim:SendKeyEvent(false,k,false,game) end
+    local function reset() press(Enum.KeyCode.Escape,.15) task.wait(.2) press(Enum.KeyCode.R,.1) task.wait(.2) press(Enum.KeyCode.Return,.1) end
+    local function ready()
+        local g=p:FindFirstChild("PlayerGui") if not g then return false end
+        local m=g:FindFirstChild("Menu") if not m then return false end
+        local t=m.Frame.C.Frame.A.Sam:FindFirstChild("SamTimer")
+        return(t and t.Text=="Ready!")
+    end
+    local function spawnC()
+        pcall(function() r.Connections.Spawn:FireServer(10) end)
+        task.wait(.6)
+        pcall(function() r.Connections.Claim_Sam:FireServer("Claim10") end)
+        task.wait(1) -- wait for Compass to appear
+    end
+    local function drop()
+        while true do
+            local t = bp:FindFirstChild("Compass") or c:FindFirstChild("Compass")
+            if not t then break end
+            if t.Parent==bp then c.Humanoid:EquipTool(t) task.wait(.3) end
+            press(Enum.KeyCode.Backspace,.05) task.wait(.25)
+            print("[DROP]",t.Name)
+        end
+    end
+
+    local function tele()
+        local code = getgenv().Config["AccessCode"]
+        local id = game.PlaceId
+        while true do
+            local hrp = c:FindFirstChild("HumanoidRootPart")
+            local oldPos = hrp and hrp.Position
+            game.RobloxReplicatedStorage.ContactListIrisInviteTeleport:FireServer(id,"",code)
+            print("[TELE] Trying to join private server...")
+
+            task.wait(5)
+            if not hrp or not hrp.Parent or hrp.Position ~= oldPos then
+                print("[TELE] Joined successfully!")
+                break
+            else
+                print("[TELE] Server full, retrying in 30s")
+                task.wait(30)
+            end
+        end
+    end
+
+    if game.Players:FindFirstChild(getgenv().Config["LegendName"]) then
+        print("[INFO] Detected "..getgenv().Config["LegendName"].." in server")
+        for i=1,3 do
+            spawnC()
+            drop()
+            task.wait(3)
+            reset()
+        end
+        task.wait(2)
+        p:Kick("Claimed and dropped Sam for "..getgenv().Config["LegendName"])
+    else
+        print("[INFO] Normal server, checking Ready every 10s")
+        while task.wait(10) do
+            if ready() then
+                tele()
+                break
+            else
+                print("[WAIT] Sam not Ready yet")
+            end
+        end
+    end
+end)
+
+-- ================== BOOST FPS ==================
+if getgenv().Config["BoostFPS"] then
+    for i, v in next, workspace:GetDescendants() do
+        pcall(function()
+            v.Transparency = 1
+        end)
+    end
+    local a = workspace
+    a.DescendantAdded:Connect(function(v)
+        pcall(function()
+            v.Transparency = 1
+        end)
+    end)
+    workspace.ClientAnimatorThrottling = Enum.ClientAnimatorThrottlingMode.Enabled
+    workspace.InterpolationThrottling = Enum.InterpolationThrottlingMode.Enabled
+    settings():GetService("RenderSettings").EagerBulkExecution = false
+    workspace.LevelOfDetail = Enum.ModelLevelOfDetail.Disabled
+    game:GetService("Lighting").GlobalShadows = false
+
+    settings().Rendering.QualityLevel = "Level01"
+    local g = game
+    local w = g.Workspace
+    local l = g.Lighting
+    local t = w.Terrain
+    t.WaterWaveSize = 0
+    t.WaterWaveSpeed = 0
+    t.WaterReflectance = 0
+    t.WaterTransparency = 0
+    l.GlobalShadows = false
+    l.FogEnd = 9e9
+    l.Brightness = 0
+    for i, v in pairs(g:GetDescendants()) do
+        if v.ClassName == "WedgePart" or v.ClassName == "Terrain" or v.ClassName == "MeshPart" then
+            v.BrickColor = BrickColor.new(155, 155, 155)
+            v.Material = "Plastic"
+            v.Transparency = 1
+        end
+        if v:IsA("Part") or v:IsA("Union") or v:IsA("CornerWedgePart") or v:IsA("TrussPart") then
+            v.Material = "Plastic"
+            v.Reflectance = 0
+        elseif v:IsA("Decal") or v:IsA("Texture") then
+            v.Transparency = 1
+        elseif v:IsA("ParticleEmitter") or v:IsA("Trail") then
+            v.Lifetime = NumberRange.new(0)
+        elseif v:IsA("Explosion") then
+            v.BlastPressure = 1
+            v.BlastRadius = 1
+        elseif v:IsA("Fire") or v:IsA("SpotLight") or v:IsA("Smoke") or v:IsA("Sparkles") then
+            v.Enabled = false
+        elseif v:IsA("MeshPart") then
+            v.Material = "Plastic"
+            v.Reflectance = 0
+            v.TextureID = 10385902758728957
+        end
+    end
+    game.Workspace.ChildAdded:Connect(function(v)
+        if v.ClassName == "WedgePart" or v.ClassName == "Terrain" or v.ClassName == "MeshPart" then
+            v.BrickColor = BrickColor.new(155, 155, 155)
+            v.Material = "Plastic"
+            v.Transparency = 1
+        end
+        if v:IsA("Part") or v:IsA("Union") or v:IsA("CornerWedgePart") or v:IsA("TrussPart") then
+            v.Material = "Plastic"
+            v.Reflectance = 0
+        elseif v:IsA("Decal") or v:IsA("Texture") then
+            v.Transparency = 1
+        elseif v:IsA("ParticleEmitter") or v:IsA("Trail") then
+            v.Lifetime = NumberRange.new(0)
+        elseif v:IsA("Explosion") then
+            v.BlastPressure = 1
+            v.BlastRadius = 1
+        elseif v:IsA("Fire") or v:IsA("SpotLight") or v:IsA("Smoke") or v:IsA("Sparkles") then
+            v.Enabled = false
+        elseif v:IsA("MeshPart") then
+            v.Material = "Plastic"
+            v.Reflectance = 0
+            v.TextureID = 10385902758728957
+        end
+    end)
+    for i, e in pairs(l:GetChildren()) do
+        if e:IsA("BlurEffect") or e:IsA("SunRaysEffect") or e:IsA("ColorCorrectionEffect") or e:IsA("BloomEffect") or
+            e:IsA("DepthOfFieldEffect") then
+            e.Enabled = false
+        end
+    end
+    game.Lighting.ChildAdded:Connect(function(v)
+        if v:IsA("BlurEffect") or v:IsA("SunRaysEffect") or v:IsA("ColorCorrectionEffect") or v:IsA("BloomEffect") or
+            v:IsA("DepthOfFieldEffect") then
+            v.Enabled = false
+        end
+    end)
+    print("[AUTO] Boost FPS Loaded ✓")
+end
+
+-- ================== BLACK SCREEN ==================
+if getgenv().Config["BlackScreen"] then
+    game:GetService("Lighting").ExposureCompensation = -math.huge
+    print("[AUTO] Black Screen Enabled ✓")
+end
