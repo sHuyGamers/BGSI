@@ -62,18 +62,6 @@ local function drop()
     if #lst>0 then sendWebhook(lst) end
 end
 
--- ================== TELE FIND ==================
-local function tele()
-    if not has("Compass",c) and not equip("Compass") then return end
-    vim:SendMouseButtonEvent(0,0,0,true,game,0)
-    for _,v in ipairs(pos) do
-        if not has("Compass",c) and not equip("Compass") then break end
-        c.HumanoidRootPart.CFrame=CFrame.new(v)
-        task.wait(getgenv().Config.TeleportDelay)
-    end
-    vim:SendMouseButtonEvent(0,0,0,false,game,0)
-end
-
 -- ================== MAIN LOOP ==================
 task.spawn(function()
     while task.wait(.5) do
