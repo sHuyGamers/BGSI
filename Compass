@@ -84,15 +84,6 @@ task.spawn(function()
             tele()
         end
 
-        -- Always check for Compass dropped in workspace
-        for _,v in ipairs(workspace:GetChildren()) do
-            if v:IsA("Tool") and v.Name=="Compass" and v:FindFirstChild("Handle") then
-                c.HumanoidRootPart.CFrame=v.Handle.CFrame+Vector3.new(0,3,0)
-                print("[PICKUP] Compass collected from ground")
-                task.wait(.5)
-            end
-        end
-
         -- Drop boxes if found
         for _,n in ipairs(getgenv().Config.DropList) do
             if has(n,bp) then 
