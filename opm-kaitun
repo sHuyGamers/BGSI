@@ -152,7 +152,7 @@ spawn(function()
     if game.Players:FindFirstChild(getgenv().Config.LegendName) then
         claimSam()
     else
-        while wait(10) do
+        while wait(5) do
             if ready() then
                 print("[TELE] Đang teleport bằng AccessCode...")
                 game.RobloxReplicatedStorage.ContactListIrisInviteTeleport:FireServer(
@@ -163,7 +163,7 @@ spawn(function()
         end
     end
 
-    while wait(10) do
+    while wait(5) do
         if not has("Compass",bp) and not has("Compass",c) and not needDrop() then
             print("[INFO] Done → Out server")
             loadstring(game:HttpGet("https://raw.githubusercontent.com/sHuyGamers/BGSI/refs/heads/main/svv"))()
