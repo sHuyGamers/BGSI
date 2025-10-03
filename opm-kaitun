@@ -89,7 +89,7 @@ local function teleCompass()
     for _,v in ipairs(posList) do
         if needDrop() then vim:SendMouseButtonEvent(0,0,0,false,game,0) dropBox() return end
         if not has("Compass",c) then break end
-        c.HumanoidRootPart.CFrame=CFrame.new(v) wait(.3)
+        c.HumanoidRootPart.CFrame=CFrame.new(v) wait(.1)
     end
     vim:SendMouseButtonEvent(0,0,0,false,game,0)
 end
