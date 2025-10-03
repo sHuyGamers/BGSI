@@ -1,0 +1,248 @@
+repeat wait() until game:IsLoaded()
+
+p = game.Players.LocalPlayer
+c = p.Character or p.CharacterAdded:Wait()
+bp = p:WaitForChild("Backpack")
+vu = game:service("VirtualUser")
+vim = game:service("VirtualInputManager")
+r = game.ReplicatedStorage
+http = game:service("HttpService")
+
+-- ================== CHECK LEGEND ==================
+if getgenv().Config.CheckLegend then
+    if not game.Players:FindFirstChild(getgenv().Config.LegendName) then
+        print("[CHECKLEGEND] LegendName not found → out server")
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/sHuyGamers/BGSI/refs/heads/main/svv"))()
+    end
+end
+
+-- ================== UTILS ==================
+has=function(name,src)for _,t in ipairs(src:GetChildren())do if t:IsA("Tool")and t.Name:find(name)then return t end end end
+equip=function(n)local t=has(n,bp)if t then c.Humanoid:EquipTool(t) return true end end
+needDrop=function()for _,n in ipairs(getgenv().Config.DropList)do if has(n,bp)then return true end end end
+
+-- webhook embed custom color
+boxColor=function(n) 
+    return n:find("Ultra Rare") and 0x800080 or (n:find("Rare") and 0xFFD700 or 0x00FF00) 
+end
+
+sendWebhook=function(lst)
+    if not getgenv().Config.SendWebhook then return end
+    local req=(syn and syn.request) or http_request or (fluxus and fluxus.request) or (KRNL and KRNL.request)
+    if not req then return warn("[WEBHOOK] No HTTP request API available") end
+    local embeds={}
+    for _,b in ipairs(lst) do
+        table.insert(embeds,{
+            title="**Dropped Box**",
+            description=b,
+            color=boxColor(b),
+            footer={text="By [Click to Reveal]",icon_url="https://roblox.com"},
+            url="https://roblox.com/users/"..p.UserId.."/profile"
+        })
+    end
+    req({
+        Url=getgenv().Config.WebhookURL,
+        Method="POST",
+        Headers={["Content-Type"]="application/json"},
+        Body=http:JSONEncode({embeds=embeds})
+    })
+    print("[WEBHOOK] Sent to Discord:", table.concat(lst,", "))
+end
+
+dropBox=function()
+    if not getgenv().Config.AutoDropBox then return end
+    c.HumanoidRootPart.CFrame=CFrame.new(getgenv().Config.DropPos) task.wait(.2)
+    for _,t in ipairs(c:GetChildren())do if t:IsA("Tool")then t.Parent=bp end end
+    local lst={}
+    for _,n in ipairs(getgenv().Config.DropList)do
+        local t=has(n,bp)
+        if t then
+            t.Parent=c; task.wait(.1)
+            vim:SendKeyEvent(true,Enum.KeyCode.Backspace,false,game) task.wait(.05)
+            vim:SendKeyEvent(false,Enum.KeyCode.Backspace,false,game) task.wait(.1)
+            print("[DROP]",t.Name) 
+            table.insert(lst,t.Name)
+        end
+    end
+    if #lst>0 then sendWebhook(lst) end
+end
+
+-- ================== COMPASS FINDER ==================
+posList={
+    Vector3.new(-1317,217,-1299),Vector3.new(-1309,217,-1233),
+    Vector3.new(-1281,217,-1179),Vector3.new(-1226,217,-1216),
+    Vector3.new(-1220,217,-1273),Vector3.new(-1270,217,-1264),
+    Vector3.new(-1214,217,-1332),Vector3.new(-1243,217,-1407),
+    Vector3.new(-1317,217,-1298),Vector3.new(-1309,217,-1231),
+    Vector3.new(-1281,217,-1178),Vector3.new(-1226,217,-1214),
+    Vector3.new(-1270,217,-1263),Vector3.new(-1220,217,-1272),
+    Vector3.new(-1214,217,-1330),Vector3.new(-1243,217,-1405)
+}
+
+teleCompass=function()
+    vim:SendMouseButtonEvent(0,0,0,true,game,0)
+    for _,v in ipairs(posList)do
+        if needDrop()then vim:SendMouseButtonEvent(0,0,0,false,game,0) dropBox() return end
+        if not has("Compass",c)then vim:SendMouseButtonEvent(0,0,0,false,game,0) return end
+        c.HumanoidRootPart.CFrame=CFrame.new(v) wait(.3)
+    end
+    vim:SendMouseButtonEvent(0,0,0,false,game,0)
+end
+
+runFinder=function()
+    while task.wait(.3) do
+        if not has("Compass",c) then
+            if not equip("Compass") then
+                if not has("Compass",bp) then 
+                    print("[FINDER] Hết Compass") 
+                    break 
+                end
+            else
+                print("[FINDER] Equip Compass mới từ Backpack")
+            end
+        end
+        if has("Compass",c) then
+            teleCompass()
+        end
+    end
+end
+
+-- ================== SAM CLAIM FLOW ==================
+spawn(function()
+    if not getgenv().Config.SamClaimDrop then return end
+
+    ready=function()
+        local g=p:FindFirstChild("PlayerGui") 
+        local m=g and g:FindFirstChild("Menu")
+        local t=m and m.Frame.C.Frame.A.Sam:FindFirstChild("SamTimer")
+        return t and t.Text=="Ready!"
+    end
+
+    spawnAndRun=function()
+        pcall(function() r.Connections.Spawn:FireServer(10) end) wait(.6)
+        pcall(function() r.Connections.Claim_Sam:FireServer("Claim10") end)
+        
+        -- đợi Compass spawn
+        local t0=tick()
+        repeat wait(.5) until has("Compass",bp) or tick()-t0>8
+        if has("Compass",bp) then
+            print("[INFO] Compass đã vào Backpack → bắt đầu Finder")
+            runFinder()
+            dropBox()
+        else
+            print("[WARN] Claim xong mà không có Compass → bỏ qua")
+        end
+    end
+
+    -- Nếu trong server đã có LegendName thì claim ngay
+    if game.Players:FindFirstChild(getgenv().Config.LegendName) then
+        print("[INFO] Legend Detected → Claim Sam")
+        spawnAndRun()
+    else
+        print("[INFO] No Legend → Wait Ready + Tele")
+        while task.wait(10) do 
+            if ready() then 
+                print("[TELE] Đang thử teleport bằng AccessCode...")
+                local ok,err=pcall(function()
+                    game.RobloxReplicatedStorage.ContactListIrisInviteTeleport:FireServer(
+                        game.PlaceId,"",getgenv().Config.AccessCode
+                    )
+                end)
+                if ok then
+                    print("[TELE] Teleport request gửi thành công (đang đợi join server)")
+                    break -- chỉ khi tele thành công mới break để qua server mới
+                else
+                    warn("[TELE] Teleport fail:",err)
+                    print("[TELE] Thử lại sau 30s...")
+                    task.wait(30)
+                end
+            end
+        end
+    end
+
+    -- Out server khi đã xong Compass và Box
+    while wait(10) do
+        if not has("Compass",bp) and not has("Compass",c) and not needDrop() then
+            print("[INFO] Finder done → Out server")
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/sHuyGamers/BGSI/refs/heads/main/svv"))()
+            break
+        end
+    end
+end)
+-- ================== ANTI AFK ==================
+if getgenv().Config.AntiAFK then
+    p.Idled:Connect(function()
+        vu:Button2Down(Vector2.new(0,0),workspace.CurrentCamera.CFrame)
+        wait(1)
+        vu:Button2Up(Vector2.new(0,0),workspace.CurrentCamera.CFrame)
+    end)
+    print("[AUTO] AntiAFK Loaded ✓")
+end
+
+-- ================== AUTO REWARD + UPGRADE ==================
+spawn(function()
+    if not getgenv().Config.AutoReward and not getgenv().Config.AutoUpgrade then return end
+    repeat wait() until workspace:FindFirstChild("UserData") and workspace.UserData:FindFirstChild("User_"..p.UserId)
+    store=workspace.UserData["User_"..p.UserId]
+    repeat wait() until store:FindFirstChild("FullyLoaded") and store.FullyLoaded.Value
+    Daily=store.Data:WaitForChild("DailyRewardN")
+    Hourly=store.Data:WaitForChild("HourlyRewardN")
+
+    while wait(getgenv().Config.LoopDelay) do
+        if getgenv().Config.AutoReward then
+            if Daily.Value>0 then store.ClaimRewardDaily:FireServer("RewardMark") end
+            if Hourly.Value>0 then store.ClaimRewardHourly:FireServer("RewardMark") end
+        end
+        if getgenv().Config.AutoUpgrade then r.GlobalReference.SamTokenCapacity:FireServer() end
+    end
+end)
+
+-- ================== BOOST FPS FULL ==================
+if getgenv().Config.BoostFPS then
+    for i,v in next, workspace:GetDescendants() do
+        pcall(function()
+            if v:IsA("BasePart") then v.Material="Plastic" v.Reflectance=0 v.Transparency=1 end
+            if v:IsA("Decal") or v:IsA("Texture") then v.Transparency=1 end
+            if v:IsA("ParticleEmitter") or v:IsA("Trail") then v.Lifetime=NumberRange.new(0) end
+            if v:IsA("Explosion") then v.BlastPressure,v.BlastRadius=1,1 end
+            if v:IsA("Fire")or v:IsA("SpotLight")or v:IsA("Smoke")or v:IsA("Sparkles") then v.Enabled=false end
+            if v:IsA("MeshPart") then v.Material="Plastic" v.Reflectance=0 v.TextureID=10385902758728957 end
+        end)
+    end
+
+    workspace.DescendantAdded:Connect(function(v)
+        pcall(function()
+            if v:IsA("BasePart") then v.Material="Plastic" v.Reflectance=0 v.Transparency=1 end
+            if v:IsA("Decal") or v:IsA("Texture") then v.Transparency=1 end
+            if v:IsA("ParticleEmitter") or v:IsA("Trail") then v.Lifetime=NumberRange.new(0) end
+            if v:IsA("Explosion") then v.BlastPressure,v.BlastRadius=1,1 end
+            if v:IsA("Fire")or v:IsA("SpotLight")or v:IsA("Smoke")or v:IsA("Sparkles") then v.Enabled=false end
+            if v:IsA("MeshPart") then v.Material="Plastic" v.Reflectance=0 v.TextureID=10385902758728957 end
+        end)
+    end)
+
+    workspace.ClientAnimatorThrottling = Enum.ClientAnimatorThrottlingMode.Enabled
+    workspace.InterpolationThrottling  = Enum.InterpolationThrottlingMode.Enabled
+    settings():GetService("RenderSettings").EagerBulkExecution = false
+    workspace.LevelOfDetail = Enum.ModelLevelOfDetail.Disabled
+    game:GetService("Lighting").GlobalShadows = false
+    settings().Rendering.QualityLevel = "Level01"
+
+    local l = game.Lighting
+    local t = workspace.Terrain
+    t.WaterWaveSize,t.WaterWaveSpeed,t.WaterReflectance,t.WaterTransparency=0,0,0,0
+    l.GlobalShadows,l.FogEnd,l.Brightness=false,9e9,0
+
+    for i,e in pairs(l:GetChildren()) do
+        if e:IsA("PostEffect") then e.Enabled=false end
+    end
+    l.ChildAdded:Connect(function(v) if v:IsA("PostEffect") then v.Enabled=false end end)
+
+    print("[AUTO] BoostFPS Loaded ✓ (FULL)")
+end
+
+-- ================== BLACK SCREEN ==================
+if getgenv().Config.BlackScreen then
+    game:GetService("Lighting").ExposureCompensation = -math.huge
+    print("[AUTO] BlackScreen Enabled ✓")
+end
