@@ -139,8 +139,7 @@ spawn(function()
         pcall(function() r.Connections.Spawn:FireServer(10) end) wait(.6)
         pcall(function() r.Connections.Claim_Sam:FireServer("Claim10") end)
 
-        local t0=tick()
-        repeat wait(.5) until has("Compass",bp) or tick()-t0>10
+        wait(6)
         if has("Compass",bp) then
             print("[INFO] Compass vào Backpack → Finder Start")
             equip("Compass") wait(1)
