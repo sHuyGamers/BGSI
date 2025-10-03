@@ -1,12 +1,13 @@
+
 repeat wait() until game:IsLoaded()
 
-p = game.Players.LocalPlayer
-c = p.Character or p.CharacterAdded:Wait()
-bp = p:WaitForChild("Backpack")
-vu = game:service("VirtualUser")
-vim = game:service("VirtualInputManager")
-r = game.ReplicatedStorage
-http = game:service("HttpService")
+local p   = game.Players.LocalPlayer
+local c   = p.Character or p.CharacterAdded:Wait()
+local bp  = p:WaitForChild("Backpack")
+local vu  = game:service("VirtualUser")
+local vim = game:service("VirtualInputManager")
+local r   = game.ReplicatedStorage
+local http= game:service("HttpService")
 
 -- ================== CHECK LEGEND ==================
 if getgenv().Config.CheckLegend then
@@ -17,26 +18,35 @@ if getgenv().Config.CheckLegend then
 end
 
 -- ================== UTILS ==================
-has=function(name,src)for _,t in ipairs(src:GetChildren())do if t:IsA("Tool")and t.Name:find(name)then return t end end end
-equip=function(n)local t=has(n,bp)if t then c.Humanoid:EquipTool(t) return true end end
-needDrop=function()for _,n in ipairs(getgenv().Config.DropList)do if has(n,bp)then return true end end end
-
--- webhook embed custom color
-boxColor=function(n) 
-    return n:find("Ultra Rare") and 0x800080 or (n:find("Rare") and 0xFFD700 or 0x00FF00) 
+local function has(name,src)
+    for _,t in ipairs(src:GetChildren()) do 
+        if t:IsA("Tool") and t.Name:find(name) then return t end 
+    end 
 end
 
-sendWebhook=function(lst)
-    if not getgenv().Config.SendWebhook then return end
-    local req=(syn and syn.request) or http_request or (fluxus and fluxus.request) or (KRNL and KRNL.request)
-    if not req then return warn("[WEBHOOK] No HTTP request API available") end
+local function equip(n)
+    local t=has(n,bp) 
+    if t then c.Humanoid:EquipTool(t) return true end 
+end
+
+local function needDrop()
+    for _,n in ipairs(getgenv().Config.DropList) do 
+        if has(n,bp) then return true end 
+    end 
+end
+
+local function sendWebhook(lst)
+    if not getgenv().Config.SendWebhook or #lst==0 then return end
+    local req=(syn and syn.request) or http_request or request
+    if not req then return end
+
     local embeds={}
     for _,b in ipairs(lst) do
         table.insert(embeds,{
-            title="**Dropped Box**",
+            title="🎁 Box Found",
             description=b,
-            color=boxColor(b),
-            footer={text="By [Click to Reveal]",icon_url="https://roblox.com"},
+            color=(b:find("Ultra Rare") and 0x800080) or (b:find("Rare") and 0xFFD700) or 0x00FF00,
+            footer={text="Finder Bot"},
             url="https://roblox.com/users/"..p.UserId.."/profile"
         })
     end
@@ -46,129 +56,110 @@ sendWebhook=function(lst)
         Headers={["Content-Type"]="application/json"},
         Body=http:JSONEncode({embeds=embeds})
     })
-    print("[WEBHOOK] Sent to Discord:", table.concat(lst,", "))
+    print("[WEBHOOK] Sent:", table.concat(lst,", "))
 end
 
-dropBox=function()
+local function dropBox()
     if not getgenv().Config.AutoDropBox then return end
-    c.HumanoidRootPart.CFrame=CFrame.new(getgenv().Config.DropPos) task.wait(.2)
-    for _,t in ipairs(c:GetChildren())do if t:IsA("Tool")then t.Parent=bp end end
+    c.HumanoidRootPart.CFrame=CFrame.new(getgenv().Config.DropPos) wait(.3)
     local lst={}
-    for _,n in ipairs(getgenv().Config.DropList)do
+    for _,n in ipairs(getgenv().Config.DropList) do
         local t=has(n,bp)
         if t then
-            t.Parent=c; task.wait(.1)
-            vim:SendKeyEvent(true,Enum.KeyCode.Backspace,false,game) task.wait(.05)
-            vim:SendKeyEvent(false,Enum.KeyCode.Backspace,false,game) task.wait(.1)
-            print("[DROP]",t.Name) 
-            table.insert(lst,t.Name)
+            table.insert(lst,t.Name) -- báo WH
+            t.Parent=c wait(.1)
+            vim:SendKeyEvent(true,Enum.KeyCode.Backspace,false,game) wait(.05)
+            vim:SendKeyEvent(false,Enum.KeyCode.Backspace,false,game) wait(.1)
+            print("[DROP]",t.Name)
         end
     end
     if #lst>0 then sendWebhook(lst) end
 end
 
 -- ================== COMPASS FINDER ==================
-posList={
+local posList={
     Vector3.new(-1317,217,-1299),Vector3.new(-1309,217,-1233),
     Vector3.new(-1281,217,-1179),Vector3.new(-1226,217,-1216),
     Vector3.new(-1220,217,-1273),Vector3.new(-1270,217,-1264),
-    Vector3.new(-1214,217,-1332),Vector3.new(-1243,217,-1407),
-    Vector3.new(-1317,217,-1298),Vector3.new(-1309,217,-1231),
-    Vector3.new(-1281,217,-1178),Vector3.new(-1226,217,-1214),
-    Vector3.new(-1270,217,-1263),Vector3.new(-1220,217,-1272),
-    Vector3.new(-1214,217,-1330),Vector3.new(-1243,217,-1405)
+    Vector3.new(-1214,217,-1332),Vector3.new(-1243,217,-1407)
 }
 
-teleCompass=function()
+local function teleCompass()
     vim:SendMouseButtonEvent(0,0,0,true,game,0)
-    for _,v in ipairs(posList)do
-        if needDrop()then vim:SendMouseButtonEvent(0,0,0,false,game,0) dropBox() return end
-        if not has("Compass",c)then vim:SendMouseButtonEvent(0,0,0,false,game,0) return end
+    for _,v in ipairs(posList) do
+        if needDrop() then vim:SendMouseButtonEvent(0,0,0,false,game,0) dropBox() return end
+        if not has("Compass",c) then break end
         c.HumanoidRootPart.CFrame=CFrame.new(v) wait(.3)
     end
     vim:SendMouseButtonEvent(0,0,0,false,game,0)
 end
 
-runFinder=function()
-    while task.wait(.3) do
-        if not has("Compass",c) then
-            if not equip("Compass") then
-                if not has("Compass",bp) then 
-                    print("[FINDER] Hết Compass") 
-                    break 
-                end
-            else
-                print("[FINDER] Equip Compass mới từ Backpack")
-            end
-        end
+local function runFinder()
+    while task.wait(.5) do
         if has("Compass",c) then
             teleCompass()
+        elseif has("Compass",bp) then
+            equip("Compass")
+            print("[FINDER] Equip Compass mới")
+        else
+            print("[FINDER] Không có Compass → chờ thêm")
+            wait(2)
+        end
+        if not has("Compass",bp) and not has("Compass",c) and not needDrop() then
+            print("[FINDER] Hết Compass → stop loop")
+            break
         end
     end
 end
 
--- ================== SAM CLAIM FLOW ==================
+-- ================== SAM CLAIM & MAIN ==================
 spawn(function()
-    if not getgenv().Config.SamClaimDrop then return end
-
-    ready=function()
+    local function ready()
         local g=p:FindFirstChild("PlayerGui") 
         local m=g and g:FindFirstChild("Menu")
         local t=m and m.Frame.C.Frame.A.Sam:FindFirstChild("SamTimer")
         return t and t.Text=="Ready!"
     end
 
-    spawnAndRun=function()
+    local function claimSam()
         pcall(function() r.Connections.Spawn:FireServer(10) end) wait(.6)
         pcall(function() r.Connections.Claim_Sam:FireServer("Claim10") end)
-        
-        -- đợi Compass spawn
+
         local t0=tick()
-        repeat wait(.5) until has("Compass",bp) or tick()-t0>8
+        repeat wait(.5) until has("Compass",bp) or tick()-t0>10
         if has("Compass",bp) then
-            print("[INFO] Compass đã vào Backpack → bắt đầu Finder")
+            print("[INFO] Compass vào Backpack → Finder Start")
+            equip("Compass") wait(1)
             runFinder()
             dropBox()
         else
-            print("[WARN] Claim xong mà không có Compass → bỏ qua")
+            print("[WARN] Không thấy Compass sau Claim")
         end
     end
 
-    -- Nếu trong server đã có LegendName thì claim ngay
     if game.Players:FindFirstChild(getgenv().Config.LegendName) then
-        print("[INFO] Legend Detected → Claim Sam")
-        spawnAndRun()
+        claimSam()
     else
-        print("[INFO] No Legend → Wait Ready + Tele")
-        while task.wait(10) do 
-            if ready() then 
-                print("[TELE] Đang thử teleport bằng AccessCode...")
-                local ok,err=pcall(function()
-                    game.RobloxReplicatedStorage.ContactListIrisInviteTeleport:FireServer(
-                        game.PlaceId,"",getgenv().Config.AccessCode
-                    )
-                end)
-                if ok then
-                    print("[TELE] Teleport request gửi thành công (đang đợi join server)")
-                    break -- chỉ khi tele thành công mới break để qua server mới
-                else
-                    warn("[TELE] Teleport fail:",err)
-                    print("[TELE] Thử lại sau 30s...")
-                    task.wait(30)
-                end
+        while wait(10) do
+            if ready() then
+                print("[TELE] Đang teleport bằng AccessCode...")
+                game.RobloxReplicatedStorage.ContactListIrisInviteTeleport:FireServer(
+                    game.PlaceId,"",getgenv().Config.AccessCode
+                )
+                break
             end
         end
     end
 
-    -- Out server khi đã xong Compass và Box
     while wait(10) do
         if not has("Compass",bp) and not has("Compass",c) and not needDrop() then
-            print("[INFO] Finder done → Out server")
+            print("[INFO] Done → Out server")
             loadstring(game:HttpGet("https://raw.githubusercontent.com/sHuyGamers/BGSI/refs/heads/main/svv"))()
             break
         end
     end
 end)
+
 -- ================== ANTI AFK ==================
 if getgenv().Config.AntiAFK then
     p.Idled:Connect(function()
@@ -183,10 +174,10 @@ end
 spawn(function()
     if not getgenv().Config.AutoReward and not getgenv().Config.AutoUpgrade then return end
     repeat wait() until workspace:FindFirstChild("UserData") and workspace.UserData:FindFirstChild("User_"..p.UserId)
-    store=workspace.UserData["User_"..p.UserId]
+    local store=workspace.UserData["User_"..p.UserId]
     repeat wait() until store:FindFirstChild("FullyLoaded") and store.FullyLoaded.Value
-    Daily=store.Data:WaitForChild("DailyRewardN")
-    Hourly=store.Data:WaitForChild("HourlyRewardN")
+    local Daily=store.Data:WaitForChild("DailyRewardN")
+    local Hourly=store.Data:WaitForChild("HourlyRewardN")
 
     while wait(getgenv().Config.LoopDelay) do
         if getgenv().Config.AutoReward then
