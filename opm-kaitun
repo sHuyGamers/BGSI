@@ -140,12 +140,19 @@ spawn(function()
         pcall(function() r.Connections.Claim_Sam:FireServer("Claim10") end)
 
         wait(6)
-        if has("Compass",bp) then
-            print("[INFO] Compass vào Backpack → Finder Start")
+        if has("Compass",bp) or has("Compass",c) then
+            print("[INFO] Compass vào Backpack (Lần 1) → Finder Start")
             equip("Compass") wait(1)
             runFinder()
         else
-            print("[WARN] Không thấy Compass sau Claim")
+            wait(6)
+            if has("Compass",bp) or has("Compass",c) then
+                print("[INFO] Compass vào Backpack (Lần 2) → Finder Start")
+                equip("Compass") wait(1)
+                runFinder()
+            else
+                print("[ERROR] Không thấy Compass sau Claim (Lần 2) → bỏ qua")
+            end
         end
     end
 
