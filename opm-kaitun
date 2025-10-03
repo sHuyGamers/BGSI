@@ -61,26 +61,37 @@ end
 
 local function dropBox()
     if not getgenv().Config.AutoDropBox then return end
-    c.HumanoidRootPart.CFrame=CFrame.new(getgenv().Config.DropPos) task.wait(.2)
+    
+    c.HumanoidRootPart.CFrame = CFrame.new(getgenv().Config.DropPos) 
+    task.wait(.2)
 
-    -- unequip về Backpack
+    local noclipConn
+    noclipConn = game:GetService("RunService").Stepped:Connect(function()
+        if c and c:FindFirstChild("Humanoid") then
+            c.Humanoid:ChangeState(11) -- Physics state = NoClip
+        end
+    end)
+    print("[NCLP] Noclip Enabled khi drop Box")
+
     for _,t in ipairs(c:GetChildren())do 
-        if t:IsA("Tool")then t.Parent=bp end 
+        if t:IsA("Tool") then t.Parent = bp end 
     end
 
     local lst={}
     for _,n in ipairs(getgenv().Config.DropList) do
         local t=has(n,bp)
         if t then
-            table.insert(lst,t.Name) -- báo WH
+            table.insert(lst,t.Name) 
             t.Parent=c task.wait(.1)
             vim:SendKeyEvent(true,Enum.KeyCode.Backspace,false,game) task.wait(.05)
             vim:SendKeyEvent(false,Enum.KeyCode.Backspace,false,game) task.wait(.1)
             print("[DROP]",t.Name)
         end
     end
+
     if #lst>0 then sendWebhook(lst) end
 end
+
 
 -- ================== COMPASS FINDER ==================
 local posList={
