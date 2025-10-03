@@ -1,4 +1,3 @@
-
 repeat wait() until game:IsLoaded()
 
 local p   = game.Players.LocalPlayer
@@ -20,7 +19,7 @@ end
 -- ================== UTILS ==================
 local function has(name,src)
     for _,t in ipairs(src:GetChildren()) do 
-        if t:IsA("Tool") and t.Name:find(name) then return t end 
+        if t:IsA("Tool") and t.Name == name then return t end 
     end 
 end
 
@@ -31,15 +30,16 @@ end
 
 local function needDrop()
     for _,n in ipairs(getgenv().Config.DropList) do 
-        if has(n,bp) then return true end 
+        local t=has(n,bp)
+        if t and t.Parent==bp then return true end 
     end 
+    return false
 end
 
 local function sendWebhook(lst)
     if not getgenv().Config.SendWebhook or #lst==0 then return end
     local req=(syn and syn.request) or http_request or request
     if not req then return end
-
     local embeds={}
     for _,b in ipairs(lst) do
         table.insert(embeds,{
@@ -61,15 +61,21 @@ end
 
 local function dropBox()
     if not getgenv().Config.AutoDropBox then return end
-    c.HumanoidRootPart.CFrame=CFrame.new(getgenv().Config.DropPos) wait(.3)
+    c.HumanoidRootPart.CFrame=CFrame.new(getgenv().Config.DropPos) task.wait(.2)
+
+    -- unequip về Backpack
+    for _,t in ipairs(c:GetChildren())do 
+        if t:IsA("Tool")then t.Parent=bp end 
+    end
+
     local lst={}
     for _,n in ipairs(getgenv().Config.DropList) do
         local t=has(n,bp)
         if t then
             table.insert(lst,t.Name) -- báo WH
-            t.Parent=c wait(.1)
-            vim:SendKeyEvent(true,Enum.KeyCode.Backspace,false,game) wait(.05)
-            vim:SendKeyEvent(false,Enum.KeyCode.Backspace,false,game) wait(.1)
+            t.Parent=c task.wait(.1)
+            vim:SendKeyEvent(true,Enum.KeyCode.Backspace,false,game) task.wait(.05)
+            vim:SendKeyEvent(false,Enum.KeyCode.Backspace,false,game) task.wait(.1)
             print("[DROP]",t.Name)
         end
     end
@@ -87,7 +93,11 @@ local posList={
 local function teleCompass()
     vim:SendMouseButtonEvent(0,0,0,true,game,0)
     for _,v in ipairs(posList) do
-        if needDrop() then vim:SendMouseButtonEvent(0,0,0,false,game,0) dropBox() return end
+        if needDrop() then 
+            vim:SendMouseButtonEvent(0,0,0,false,game,0) 
+            dropBox() 
+            return 
+        end
         if not has("Compass",c) then break end
         c.HumanoidRootPart.CFrame=CFrame.new(v) wait(.1)
     end
@@ -100,14 +110,18 @@ local function runFinder()
             teleCompass()
         elseif has("Compass",bp) then
             equip("Compass")
-            print("[FINDER] Equip Compass mới")
         else
-            print("[FINDER] Không có Compass → chờ thêm")
             wait(2)
         end
-        if not has("Compass",bp) and not has("Compass",c) and not needDrop() then
-            print("[FINDER] Hết Compass → stop loop")
-            break
+
+        -- Out khi hết Compass + không còn box
+        if not has("Compass",bp) and not has("Compass",c) then
+            if needDrop() then 
+                dropBox()
+            else
+                print("[FINDER] Hết Compass + Không còn Box → stop loop")
+                break
+            end
         end
     end
 end
@@ -131,7 +145,6 @@ spawn(function()
             print("[INFO] Compass vào Backpack → Finder Start")
             equip("Compass") wait(1)
             runFinder()
-            dropBox()
         else
             print("[WARN] Không thấy Compass sau Claim")
         end
