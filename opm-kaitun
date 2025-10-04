@@ -171,19 +171,24 @@ spawn(function()
     if game.Players:FindFirstChild(getgenv().Config.LegendName) then
         claimSam()
     else
-        while wait(5) do
+        while true do
+            wait(5)
             if ready() then
-                print("[TELE] Trying to teleport using AccessCode...")
-                local success, err = pcall(function()
-                    game.RobloxReplicatedStorage.ContactListIrisInviteTeleport:FireServer(
-                        game.PlaceId, "", getgenv().Config.AccessCode
-                    )
-                end)
-                if not success and tostring(err):find("GameFull") then
-                    print("[TELE] Teleport failed: Server is full. Retrying in 15 seconds...")
-                    wait(15)
+                if not game.Players:FindFirstChild(getgenv().Config.LegendName) then
+                    print("[TELE] Target not found. Trying to teleport using AccessCode in 30 seconds...")
+                    local success, err = pcall(function()
+                        game.RobloxReplicatedStorage.ContactListIrisInviteTeleport:FireServer(
+                            game.PlaceId, "", getgenv().Config.AccessCode
+                        )
+                    end)
+                    if not success and tostring(err):find("GameFull") then
+                        print("[TELE] Teleport failed: Server is full. Retrying in 30 seconds...")
+                    else
+                        print("[TELE] Teleport request sent (waiting to join server or retry in 30s)")
+                    end
+                    wait(30)
                 else
-                    print("[TELE] Teleport request sent successfully (waiting to join server)")
+                    print("[TELE] Target found in server. Stopping teleport loop.")
                     break
                 end
             end
