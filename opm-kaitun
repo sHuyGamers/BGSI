@@ -73,6 +73,7 @@ local function dropBox()
     end)
     print("[NCLP] Noclip Enabled khi drop Box")
 
+    -- Unequip về Backpack
     for _,t in ipairs(c:GetChildren())do 
         if t:IsA("Tool") then t.Parent = bp end 
     end
@@ -81,7 +82,7 @@ local function dropBox()
     for _,n in ipairs(getgenv().Config.DropList) do
         local t=has(n,bp)
         if t then
-            table.insert(lst,t.Name) 
+            table.insert(lst,t.Name) -- báo WH
             t.Parent=c task.wait(.1)
             vim:SendKeyEvent(true,Enum.KeyCode.Backspace,false,game) task.wait(.05)
             vim:SendKeyEvent(false,Enum.KeyCode.Backspace,false,game) task.wait(.1)
@@ -130,7 +131,7 @@ local function runFinder()
             if needDrop() then 
                 dropBox()
             else
-                print("[FINDER] Hết Compass + Không còn Box → stop loop")
+                print("[FINDER] None Compass + No Box → Stop loop")
                 break
             end
         end
@@ -158,11 +159,11 @@ spawn(function()
         else
             wait(6)
             if has("Compass",bp) or has("Compass",c) then
-                print("[INFO] Compass vào Backpack (Lần 2) → Finder Start")
+                print("[INFO] Compass vào Backpack  → Finder Start")
                 equip("Compass") wait(1)
                 runFinder()
             else
-                print("[ERROR] Không thấy Compass sau Claim (Lần 2) → bỏ qua")
+                print("[ERROR] Không thấy Compass sau Claim → Skip")
             end
         end
     end
@@ -172,11 +173,19 @@ spawn(function()
     else
         while wait(5) do
             if ready() then
-                print("[TELE] Đang teleport bằng AccessCode...")
-                game.RobloxReplicatedStorage.ContactListIrisInviteTeleport:FireServer(
-                    game.PlaceId,"",getgenv().Config.AccessCode
-                )
-                break
+                print("[TELE] Trying to teleport using AccessCode...")
+                local success, err = pcall(function()
+                    game.RobloxReplicatedStorage.ContactListIrisInviteTeleport:FireServer(
+                        game.PlaceId, "", getgenv().Config.AccessCode
+                    )
+                end)
+                if not success and tostring(err):find("GameFull") then
+                    print("[TELE] Teleport failed: Server is full. Retrying in 15 seconds...")
+                    wait(15)
+                else
+                    print("[TELE] Teleport request sent successfully (waiting to join server)")
+                    break
+                end
             end
         end
     end
@@ -188,7 +197,7 @@ spawn(function()
             break
         end
     end
-end)
+end)    
 
 -- ================== ANTI AFK ==================
 if getgenv().Config.AntiAFK then
