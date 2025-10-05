@@ -15,6 +15,7 @@ if getgenv().Config.CheckLegend then
         loadstring(game:HttpGet("https://raw.githubusercontent.com/sHuyGamers/BGSI/refs/heads/main/svv"))()
     end
 end
+task.wait(10)
 
 -- ================== UTILS ==================
 local function has(name,src)
