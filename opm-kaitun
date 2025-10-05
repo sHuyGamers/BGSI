@@ -150,8 +150,9 @@ spawn(function()
     local function claimSam()
         while true do
             pcall(function() r.Connections.Spawn:FireServer(10) end)
+            wait(0.6)
             pcall(function() r.Connections.Claim_Sam:FireServer("Claim10") end)
-            task.wait(2)
+            wait(6)
             if has("Compass",bp) or has("Compass",c) then
                 print("[INFO] Compass received → Finder Start")
                 equip("Compass")
@@ -160,7 +161,7 @@ spawn(function()
                 break
             else
                 print("[WARN] Compass not found after Claim. Retrying...")
-                wait(1)
+                wait(3)
             end
         end
     end
