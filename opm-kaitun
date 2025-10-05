@@ -148,20 +148,22 @@ spawn(function()
     end
 
     local function claimSam()
-        while true do
-            pcall(function() r.Connections.Spawn:FireServer(10) end)
-            wait(0.6)
-            pcall(function() r.Connections.Claim_Sam:FireServer("Claim10") end)
+        pcall(function() r.Connections.Spawn:FireServer(10) end) wait(.6)
+        pcall(function() r.Connections.Claim_Sam:FireServer("Claim10") end)
+
+        wait(6)
+        if has("Compass",bp) or has("Compass",c) then
+            print("[INFO] Compass vào Backpack (Lần 1) → Finder Start")
+            equip("Compass") wait(1)
+            runFinder()
+        else
             wait(6)
             if has("Compass",bp) or has("Compass",c) then
-                print("[INFO] Compass received → Finder Start")
-                equip("Compass")
-                wait(1)
+                print("[INFO] Compass vào Backpack  → Finder Start")
+                equip("Compass") wait(1)
                 runFinder()
-                break
             else
-                print("[WARN] Compass not found after Claim. Retrying...")
-                wait(3)
+                print("[ERROR] Không thấy Compass sau Claim → Skip")
             end
         end
     end
