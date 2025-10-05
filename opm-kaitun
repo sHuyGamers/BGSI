@@ -186,7 +186,7 @@ spawn(function()
         task.wait(1)
     end
 
-    while task.wait(1) do
+    while task.wait(10) do
         if not has("Compass", bp) and not has("Compass", c) and not needDrop() then
             print("[INFO] Done → Out server, retrying...")
             pcall(function()
