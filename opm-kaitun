@@ -15,7 +15,6 @@ if getgenv().Config.CheckLegend then
         loadstring(game:HttpGet("https://raw.githubusercontent.com/sHuyGamers/BGSI/refs/heads/main/svv"))()
     end
 end
-task.wait(10)
 
 -- ================== UTILS ==================
 local function has(name,src)
@@ -132,7 +131,7 @@ local function runFinder()
             if needDrop() then 
                 dropBox()
             else
-                print("[FINDER] None Compass + No Box → Stop loop")
+                print("[FINDER] None Compass + Not Box → stop loop")
                 break
             end
         end
@@ -149,22 +148,20 @@ spawn(function()
     end
 
     local function claimSam()
-        pcall(function() r.Connections.Spawn:FireServer(10) end) wait(.6)
-        pcall(function() r.Connections.Claim_Sam:FireServer("Claim10") end)
-
-        wait(6)
-        if has("Compass",bp) or has("Compass",c) then
-            print("[INFO] Compass vào Backpack (Lần 1) → Finder Start")
-            equip("Compass") wait(1)
-            runFinder()
-        else
+        while true do
+            pcall(function() r.Connections.Spawn:FireServer(10) end)
+            wait(0.6)
+            pcall(function() r.Connections.Claim_Sam:FireServer("Claim10") end)
             wait(6)
             if has("Compass",bp) or has("Compass",c) then
-                print("[INFO] Compass vào Backpack  → Finder Start")
-                equip("Compass") wait(1)
+                print("[INFO] Compass received → Finder Start")
+                equip("Compass")
+                wait(1)
                 runFinder()
+                break
             else
-                print("[ERROR] Không thấy Compass sau Claim → Skip")
+                print("[WARN] Compass not found after Claim. Retrying...")
+                wait(3)
             end
         end
     end
@@ -175,7 +172,7 @@ spawn(function()
         while true do
             if ready() then
                 if not game.Players:FindFirstChild(getgenv().Config.LegendName) then
-                    print("[TELE] Target not found. Trying to teleport using AccessCode in 30 seconds...")
+                    print("[TELE] Target not found. Trying to teleport using AccessCode...")
                     local success, err = pcall(function()
                         game.RobloxReplicatedStorage.ContactListIrisInviteTeleport:FireServer(
                             game.PlaceId, "", getgenv().Config.AccessCode
@@ -192,8 +189,8 @@ spawn(function()
                     break
                 end
             end
+            wait(1)
         end
-        wait(1)
     end
 
     while wait(5) do
