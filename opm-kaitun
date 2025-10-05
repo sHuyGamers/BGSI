@@ -8,7 +8,6 @@ local vim = game:service("VirtualInputManager")
 local r   = game.ReplicatedStorage
 local http= game:service("HttpService")
 
--- ================== CHECK LEGEND ==================
 if getgenv().Config.CheckLegend then
     if not game.Players:FindFirstChild(getgenv().Config.LegendName) then
         print("[CHECKLEGEND] LegendName not found → out server")
@@ -16,7 +15,6 @@ if getgenv().Config.CheckLegend then
     end
 end
 
--- ================== UTILS ==================
 local function has(name,src)
     for _,t in ipairs(src:GetChildren()) do 
         if t:IsA("Tool") and t.Name == name then return t end 
@@ -68,12 +66,11 @@ local function dropBox()
     local noclipConn
     noclipConn = game:GetService("RunService").Stepped:Connect(function()
         if c and c:FindFirstChild("Humanoid") then
-            c.Humanoid:ChangeState(11) -- Physics state = NoClip
+            c.Humanoid:ChangeState(11)
         end
     end)
     print("[NCLP] Noclip Enabled khi drop Box")
 
-    -- Unequip về Backpack
     for _,t in ipairs(c:GetChildren())do 
         if t:IsA("Tool") then t.Parent = bp end 
     end
@@ -82,7 +79,7 @@ local function dropBox()
     for _,n in ipairs(getgenv().Config.DropList) do
         local t=has(n,bp)
         if t then
-            table.insert(lst,t.Name) -- báo WH
+            table.insert(lst,t.Name)
             t.Parent=c task.wait(.1)
             vim:SendKeyEvent(true,Enum.KeyCode.Backspace,false,game) task.wait(.05)
             vim:SendKeyEvent(false,Enum.KeyCode.Backspace,false,game) task.wait(.1)
@@ -94,7 +91,6 @@ local function dropBox()
 end
 
 
--- ================== COMPASS FINDER ==================
 local posList={
     Vector3.new(-1317,217,-1299),Vector3.new(-1309,217,-1233),
     Vector3.new(-1281,217,-1179),Vector3.new(-1226,217,-1216),
@@ -123,10 +119,9 @@ local function runFinder()
         elseif has("Compass",bp) then
             equip("Compass")
         else
-            wait(2)
+            wait(1)
         end
 
-        -- Out khi hết Compass + không còn box
         if not has("Compass",bp) and not has("Compass",c) then
             if needDrop() then 
                 dropBox()
@@ -138,7 +133,6 @@ local function runFinder()
     end
 end
 
--- ================== SAM CLAIM & MAIN ==================
 spawn(function()
     local function ready()
         local g=p:FindFirstChild("PlayerGui") 
@@ -148,22 +142,19 @@ spawn(function()
     end
 
     local function claimSam()
-        pcall(function() r.Connections.Spawn:FireServer(10) end) wait(.6)
-        pcall(function() r.Connections.Claim_Sam:FireServer("Claim10") end)
-
-        wait(6)
-        if has("Compass",bp) or has("Compass",c) then
-            print("[INFO] Compass vào Backpack (Lần 1) → Finder Start")
-            equip("Compass") wait(1)
-            runFinder()
-        else
-            wait(6)
+        while true do
+            pcall(function() r.Connections.Spawn:FireServer(10) end)
+            pcall(function() r.Connections.Claim_Sam:FireServer("Claim10") end)
+            task.wait(1)
             if has("Compass",bp) or has("Compass",c) then
-                print("[INFO] Compass vào Backpack  → Finder Start")
-                equip("Compass") wait(1)
+                print("[INFO] Compass received → Finder Start")
+                equip("Compass")
+                wait(1)
                 runFinder()
+                break
             else
-                print("[ERROR] Không thấy Compass sau Claim → Skip")
+                print("[WARN] Compass not found after Claim. Retrying...")
+                wait(1)
             end
         end
     end
@@ -172,7 +163,6 @@ spawn(function()
         claimSam()
     else
         while true do
-            wait(5)
             if ready() then
                 if not game.Players:FindFirstChild(getgenv().Config.LegendName) then
                     print("[TELE] Target not found. Trying to teleport using AccessCode in 30 seconds...")
@@ -186,25 +176,26 @@ spawn(function()
                     else
                         print("[TELE] Teleport request sent (waiting to join server or retry in 30s)")
                     end
-                    wait(30)
+                    task.wait(30)
                 else
                     print("[TELE] Target found in server. Stopping teleport loop.")
                     break
                 end
             end
         end
+        task.wait(1)
     end
 
-    while wait(5) do
-        if not has("Compass",bp) and not has("Compass",c) and not needDrop() then
-            print("[INFO] Done → Out server")
-            loadstring(game:HttpGet("https://raw.githubusercontent.com/sHuyGamers/BGSI/refs/heads/main/svv"))()
-            break
+    while task.wait(1) do
+        if not has("Compass", bp) and not has("Compass", c) and not needDrop() then
+            print("[INFO] Done → Out server, retrying...")
+            pcall(function()
+                loadstring(game:HttpGet("https://raw.githubusercontent.com/sHuyGamers/BGSI/refs/heads/main/svv"))()
+            end)
         end
     end
 end)    
 
--- ================== ANTI AFK ==================
 if getgenv().Config.AntiAFK then
     p.Idled:Connect(function()
         vu:Button2Down(Vector2.new(0,0),workspace.CurrentCamera.CFrame)
@@ -214,7 +205,6 @@ if getgenv().Config.AntiAFK then
     print("[AUTO] AntiAFK Loaded ✓")
 end
 
--- ================== AUTO REWARD + UPGRADE ==================
 spawn(function()
     if not getgenv().Config.AutoReward and not getgenv().Config.AutoUpgrade then return end
     repeat wait() until workspace:FindFirstChild("UserData") and workspace.UserData:FindFirstChild("User_"..p.UserId)
@@ -232,7 +222,6 @@ spawn(function()
     end
 end)
 
--- ================== BOOST FPS FULL ==================
 if getgenv().Config.BoostFPS then
     for i,v in next, workspace:GetDescendants() do
         pcall(function()
@@ -276,7 +265,6 @@ if getgenv().Config.BoostFPS then
     print("[AUTO] BoostFPS Loaded ✓ (FULL)")
 end
 
--- ================== BLACK SCREEN ==================
 if getgenv().Config.BlackScreen then
     game:GetService("Lighting").ExposureCompensation = -math.huge
     print("[AUTO] BlackScreen Enabled ✓")
