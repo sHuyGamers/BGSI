@@ -1,0 +1,85 @@
+getgenv().Config = {
+    BoostFPS   = true, 
+    BlackScreen = true 
+}
+
+repeat task.wait() until game:IsLoaded()
+
+if getgenv().Config.BoostFPS then
+    task.spawn(function()
+        for _, v in next, workspace:GetDescendants() do
+            pcall(function()
+                if v:IsA("BasePart") then
+                    v.Material = "Plastic"
+                    v.Reflectance = 0
+                    v.Transparency = 1
+                elseif v:IsA("Decal") or v:IsA("Texture") then
+                    v.Transparency = 1
+                elseif v:IsA("ParticleEmitter") or v:IsA("Trail") then
+                    v.Lifetime = NumberRange.new(0)
+                elseif v:IsA("Explosion") then
+                    v.BlastPressure, v.BlastRadius = 1, 1
+                elseif v:IsA("Fire") or v:IsA("SpotLight") or v:IsA("Smoke") or v:IsA("Sparkles") then
+                    v.Enabled = false
+                elseif v:IsA("MeshPart") then
+                    v.Material = "Plastic"
+                    v.Reflectance = 0
+                    v.TextureID = 10385902758728957
+                end
+            end)
+        end
+
+        workspace.DescendantAdded:Connect(function(v)
+            pcall(function()
+                if v:IsA("BasePart") then
+                    v.Material = "Plastic"
+                    v.Reflectance = 0
+                    v.Transparency = 1
+                elseif v:IsA("Decal") or v:IsA("Texture") then
+                    v.Transparency = 1
+                elseif v:IsA("ParticleEmitter") or v:IsA("Trail") then
+                    v.Lifetime = NumberRange.new(0)
+                elseif v:IsA("Explosion") then
+                    v.BlastPressure, v.BlastRadius = 1, 1
+                elseif v:IsA("Fire") or v:IsA("SpotLight") or v:IsA("Smoke") or v:IsA("Sparkles") then
+                    v.Enabled = false
+                elseif v:IsA("MeshPart") then
+                    v.Material = "Plastic"
+                    v.Reflectance = 0
+                    v.TextureID = 10385902758728957
+                end
+            end)
+        end)
+
+        -- 🔧 Tối ưu Render
+        workspace.ClientAnimatorThrottling = Enum.ClientAnimatorThrottlingMode.Enabled
+        workspace.InterpolationThrottling  = Enum.InterpolationThrottlingMode.Enabled
+        workspace.LevelOfDetail = Enum.ModelLevelOfDetail.Disabled
+        settings():GetService("RenderSettings").EagerBulkExecution = false
+        settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
+        game:GetService("Lighting").GlobalShadows = false
+
+        -- 🌊 Giảm hiệu ứng nước, ánh sáng
+        local lighting = game:GetService("Lighting")
+        local terrain  = workspace.Terrain
+        terrain.WaterWaveSize, terrain.WaterWaveSpeed, terrain.WaterReflectance, terrain.WaterTransparency = 0, 0, 0, 0
+        lighting.GlobalShadows = false
+        lighting.FogEnd = 9e9
+        lighting.Brightness = 0
+
+        -- 🧹 Tắt toàn bộ PostEffect
+        for _, e in ipairs(lighting:GetChildren()) do
+            if e:IsA("PostEffect") then e.Enabled = false end
+        end
+        lighting.ChildAdded:Connect(function(v)
+            if v:IsA("PostEffect") then v.Enabled = false end
+        end)
+
+        print("[BOOST] BoostFPS Loaded ✓ (FULL)")
+    end)
+end
+
+if getgenv().Config.BlackScreen then
+    game:GetService("Lighting").ExposureCompensation = -math.huge
+    print("[SCREEN] BlackScreen Enabled ✓")
+end
