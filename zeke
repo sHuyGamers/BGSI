@@ -6,7 +6,8 @@ getgenv().Config = {
         EventFarm = {
             AutoHauntlet = true, -- Enable/disable event farming
             AutoTameCatBat = true, 
-            AutoClaimTreatBag = true, 
+            AutoClaimTreatBag = true,
+            AutoFashion = true,
         },
         BabyFarm = false, -- Enable/disable baby farming
         PetFarm = {
