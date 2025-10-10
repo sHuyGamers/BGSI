@@ -1,4 +1,4 @@
 task.spawn(function()loadstring(game:HttpGet("https://raw.githubusercontent.com/sHuyGamers/BGSI/refs/heads/main/svv"))()end)
-task.delay(35,function()
+task.delay(15,function()
     loadstring(game:HttpGet("https://raw.githubusercontent.com/sHuyGamers/BGSI/refs/heads/main/zeke"))()
 end)
