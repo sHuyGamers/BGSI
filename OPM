@@ -1,4 +1,3 @@
--- ================== INIT ==================
 if not game:IsLoaded() then game.Loaded:Wait() end
 local p = game.Players.LocalPlayer
 local vu = game:GetService("VirtualUser")
